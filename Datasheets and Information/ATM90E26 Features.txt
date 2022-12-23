@@ -1,0 +1,51 @@
+Description
+The M90E26 is a high-performance wide-span energy metering chip. The ADC and DSP technology ensure the chip's longterm stability over variations in grid and ambient environmental conditions. 
+
+Features
+Metering Features
+• Metering features fully in compliance with the requirements of IEC62052-11,
+IEC62053-21 and IEC62053-23; applicable in class 1 or class 2 single-phase watthour meter or class 2 single-phase var-hour meter.
+• Accuracy of 0.1% for active energy and 0.2% for reactive energy over a dynamic
+range of 5000:1.
+• Temperature coefficient is 15 ppm/ ? (typical) for on-chip reference voltage
+• Single-point calibration over a dynamic range of 5000:1 for active energy; no calibration needed for reactive energy.
+• Energy Meter Constant doubling at low current to save verification time.
+• Electrical parameters measurement: less than ±0.5% fiducial error for Vrms, Irms,
+mean active/ reactive/ apparent power, frequency, power factor and phase angle.
+• Forward/ reverse active/ reactive energy with independent energy registers. Active/
+reactive energy can be output by pulse or read through energy registers to adapt to
+different applications.
+• Programmable startup and no-load power threshold.
+• Dedicated ADC and different gains for L line and N line current sampling circuits.
+Current sampled over shunt resistor or current transformer (CT); voltage sampled
+over resistor divider network or potential transformer (PT).
+• Programmable L line and N line metering modes: anti-tampering mode (larger
+power), L line mode (fixed L line), L+N mode (applicable for single-phase three-wire
+system) and flexible mode (configure through register).
+• Programmable L line and N line power difference threshold in anti-tampering mode.
+Other Features
+• 3.3V single power supply. Operating voltage range: 2.8~3.6V. Metering accuracy
+guaranteed within 3.0V~3.6V. 5V compatible for digital input.
+• Built-in hysteresis for power-on reset.
+• Selectable UART interface and SPI interface (four-wire SPI interface or simplified
+three-wire SPI interface with fixed 24 cycles for all registers operation).
+• Parameter diagnosis function and programmable interrupt output of the IRQ interrupt signal and the WarnOut signal.
+• Programmable voltage sag detection and zero-crossing output.
+• Channel input range
+- Voltage channel (when gain is '1'): 120µVrms~600mVrms.
+- L line current channel (when gain is '24'): 5µVrms~25mVrms.
+- N line current channel (when gain is '1'): 120µVrms~600mVrms.
+• Programmable L line current gain: 1, 4, 8, 16, 24; Programmable N line gain: 1, 2, 4.
+• Support L line and N line offset compensation.
+• CF1 and CF2 output active and reactive energy pulses respectively which can be
+used for calibration or energy accumulation.
+• Crystal oscillator frequency: 8.192 MHz. 
+• Green SSOP28 package.
+• Operating temperature: -40 ? ~ +85 ? .
+
+
+Applications
+The M90E26 is used for active and reactive energy metering for single-phase two-wire (1P2W), single-phase three-wire
+(1P3W) or anti-tampering energy meters. With the measurement function, the M90E26 can also be used in power instruments which need to measure voltage, current, etc. 
+
+ditronix.net 2022
