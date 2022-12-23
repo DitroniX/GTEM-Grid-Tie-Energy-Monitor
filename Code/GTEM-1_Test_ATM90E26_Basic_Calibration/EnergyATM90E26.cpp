@@ -15,7 +15,9 @@
   You may set the BAUD rate to 921600 to speed up flashing.
   The SDK does NOT need external power to flash.  It will take Power from the USB 5V.
 
-  This test code is OPEN SOURCE and although is is not intended for real world use, it may be freely used, or modified as needed.
+  Note: In the default state, upon first power up and during reset, the Green LED may be partially lit. Once programmed and the GPIO defined, the Green LED will go off after power up.
+
+  This test code is OPEN SOURCE and formatted for easier viewing.  Although is is not intended for real world use, it may be freely used, or modified as needed.
   It is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
   Further information, details and examples can be found on our website wiki pages ditronix.net/wiki and github.com/DitroniX
