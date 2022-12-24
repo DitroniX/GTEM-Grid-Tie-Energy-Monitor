@@ -1,0 +1,24 @@
+
+For various reasons, our boards may require update.  The below list contains any revision information summary.
+
+GTEM (Grid Tie Energy Monitor)
+Features include ESP32, GTEM, ATM90E26, 16bit ADC, EEPROM, OPTO, CT-Clamp, Current, Voltage, Frequency, Power Factor, GPIO, I2C OLED, SMPS, D1 USB Flashing Compatible
+
+1.2211-102	Beta Release
+1.2212-104	Production Release
+
+
+
+
+
+
+
+
+Further information can be found:
+
+Website https://ditronix.net/
+WIKI https://ditronix.net/wiki/
+GitHub https://github.com/DitroniX
+Shop https://ditronix.net/shop/
+
+Dave Williams | G8PUO | DitroniX 1981-2022 | ditronix.net
