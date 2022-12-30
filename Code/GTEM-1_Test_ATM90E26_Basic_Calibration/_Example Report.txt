@@ -1,0 +1,41 @@
+GTEM Hardware Setup and Power-Up Test
+Testing RGB LED
+Scanning I2C Bus for Devices ...
+I2C device found at address Decimal 80 = Hex 0x50 EEPROM
+I2C Bus Scan Complete
+EEPROM Test Read Value = 0xFF Read OK.  Possible Blank EEPROM
+
+
+GTEM-1 ATM90E26 Energy Monitoring Energy Monitor - Register Status and Diagnostic Report
+ESP32 Serial ID = XXXXXXXXXXXXX   Firmware Version = GTEM Test 221230
+
+Register Name			Var/Address		Value / Binary / Information
+------------ 			-----------		--------------------------------------------------------
+System Status 			(SysStatus 0x01):	0x0002 0000000000000010 SagWarn.Enabled 
+Meter Status 			(EnStatus 0x46):	0x2801 0010100000000001 LNMode.FixedL Lline.AntiTamperL RevP.CF1ActiveForward RevQ.CF2ReActiveReverse Pnoload.NoLoadNotActive Qnoload.NotReactiveNoLoad 
+>ATM 0x46- #2801 Accumulator Populated
+MMode Status 			(MMode 0x2B):		0x9422 1001010000100010 MMode.AllZeroCrossing MMode.LNSel.LLine(Default) MMode.NLine.CurrentGain1 MMode.CurrentChannelGain1 
+>ATM 0x2B - #9422 MMode Default Value
+-----------
+Calibraration Status 		(CalStart 0x20):	0x8765 1000011101100101 RUNNING | Normal Metering Mode
+UGain Calibration Value		(UGain 0x31):		0xA028 UGain Possible Value Error
+LGain Calibration Value		(LGain 0x23):		0x1D39 
+IGain Calibration Value		(IgainL 0x32):		0x7DFB 
+Checksum Status 		(CS1 0x2C):		0xAE70 
+Checksum Status 		(CS2 0x3B):		0x4BE5 
+-----------
+Line Voltage 			(Urms 0x49):		247.63 V
+Line Current 			(Irms 0x48):		0.70 A
+Line Frequency 			(Freq 0x4C):		50.06 Hz
+Active power 			(Pmean 0x4A):		163.00 W
+Import Energy 			(APenergy 0x40):	0.00
+Export Energy 			(ANenergy 0x41):	0.00
+Power Factor 			(PowerF 0x4D):		0.94
+-----------
+Abs Active Energy 		(ATenergy 0x42):	0.00
+Abs Reactive Energy 		(Rtenergy 0x45):	0.00
+Abs Reactive Forward Energy 	(RPenergy 0x43):	0.00
+LSB RMS/Power 			(LSB 0x08):		0x5500 21760
+-----------
+DC Voltage Sensor 		(DCV_IN VP):		13.06 V AC/DC Input
+PCB Temperature Sensor		(NTC_IN VN):		18.05 ºC

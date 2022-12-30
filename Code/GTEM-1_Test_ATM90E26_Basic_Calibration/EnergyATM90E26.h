@@ -2,9 +2,10 @@
   Dave Williams, DitroniX 2019-2022 (ditronix.net)
   GTEM-1 ATM90E26 Energy Monitoring Energy Monitor  v1.0
   Features include ESP32 GTEM ATM90E26 16bit ADC EEPROM OPTO CT-Clamp Current Voltage Frequency Power Factor GPIO I2C OLED SMPS D1 USB
-  PCA 1.2212-104 - Test Code Firmware v1 - 23th December 2022
+  PCA 1.2212-104 - Test Code Firmware v1 - 30th December 2022
 
   The purpose of this test code is to cycle through the various main functions of the board, as shown below, as part of board bring up testing.
+
   Simplified Board Bring Up Test -GTEM ATM90E26 Energy Monitor ASIC - Basic Calibration Limits.  Requires Calibration.
   Additional diagnostic serial reporting has been included, for reference and expanded detail.
 
@@ -14,7 +15,7 @@
   Set the BOARD to ESP32, 'WEMOS D1 MINI ESP32' DEV Module (or similar).
   You may set the BAUD rate to 921600 to speed up flashing.
   The SDK does NOT need external power to flash.  It will take Power from the USB 5V.
-
+  
   Note: In the default state, upon first power up and during reset, the Green LED may be partially lit. Once programmed and the GPIO defined, the Green LED will go off after power up.
 
   This test code is OPEN SOURCE and formatted for easier viewing.  Although is is not intended for real world use, it may be freely used, or modified as needed.
