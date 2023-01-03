@@ -28,6 +28,19 @@ This code will configure the GTEM board and Test the hardware and ATM90E26 Energ
 Now the above is proven to work, you may wish to calibrate further. To do this open the Excel spreadsheet and update the values in pink, as needed.
 - Note, changes to any values, which is then recalculated in Excel, will result in a change of the register hex value in Yellow.  Example Ugain.
 
+The below area of code is the main defaults which could be changed:
+
+      // Calibration Defaults
+      ATM90E26_SPI::ATM90E26_SPI(int pin) {
+      _cs = pin;
+      _lgain = 0x1D39;  // Use XLS to calculate these values. Examples: 0x1D39;
+      _ugain = 0xA028;  // Use XLS to calculate these values. Examples: 0xD464;  0xA028;
+      _igain = 0x7DFB;  // Use XLS to calculate these values. Examples: 0x6E49;  0x7DFB;
+      _crc1 = 0xAE70;   // Run this application. Take auto calculated values and update here
+      _crc2 = 0x4BE5;   // Run this application. Take auto calculated values and update here
+      }
+
+
 Should you wish to update any register values, you may do so in file GTEM-1_Defaults.h.  // Calibration Defaults or // Register Defaults
 - Note, register values changes will require an update of the CRC1 or CRC2.  
    - By updating the firmware and rebooting, you may be prompted to update CRC1 or CRC2 with new values  
