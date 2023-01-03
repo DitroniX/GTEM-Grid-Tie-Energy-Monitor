@@ -9,7 +9,7 @@ This code will configure the GTEM board and Test the hardware and ATM90E26 Energ
 - With the GTEM board connected via USB, Select Comm Port and Select Device 'Wemos D1 MINI ESP32'
    - Compile / Upload
    - Open the Serial Monitor
-- Press 'Reset' on the GTEM Board.  Upon boot, you sould see the Diagnostic Page appear in the monitor and values shown.
+- Press 'Reset' on the GTEM Board.  Upon boot, you sould see the Diagnostic Page appear ONCE in the monitor and values shown.  Press board reset to refresh.
    - Example Line Voltage (Urms 0x49): 0.01 V
    - Example Line Current (Irms 0x48): 0.01 A
    - Example Line Frequency (Freq 0x4C): 102.31 Hz
