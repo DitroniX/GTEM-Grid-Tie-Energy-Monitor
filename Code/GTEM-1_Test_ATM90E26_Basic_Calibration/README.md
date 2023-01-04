@@ -1,12 +1,12 @@
 **GTEM ESP32 ATM90E26 Energy Monitor SDK**
 
-GTEM-1_Test_ATM90E26_Basic_Calibration
+GTEM-1_Test_ATM90E26_Basic_Calibration. The GTEM boards are all tested prior to shipping, based on the below guidance and calibration code.  For this reason, you may only need to tweak mains voltage and current values slightly.
 
-This code will configure the GTEM board and Test the hardware and ATM90E26 Energy Monitor.
+This code will configure the GTEM board, Test the hardware and ATM90E26 Energy Monitor.
 
 - Download Code
 - Open the code in Arduino IDE
-- With the GTEM board connected via USB, Select Comm Port and Select Device 'Wemos D1 MINI ESP32'
+- With the GTEM board connected via USB only, Select Comm Port and Select Device 'Wemos D1 MINI ESP32'
    - Compile / Upload
    - Open the Serial Monitor
 - Press 'Reset' on the GTEM Board.  Upon boot, you sould see the Diagnostic Page appear ONCE in the monitor and values shown.  Press board reset to refresh.
@@ -25,7 +25,7 @@ This code will configure the GTEM board and Test the hardware and ATM90E26 Energ
 
 
 
-Now the above is proven to work, you may wish to calibrate further (Main area being mains voltage and current). To do this open the Excel spreadsheet and update the values in pink, as needed.
+Now the above is proven to work in your setup (and maybe acceptable limits), you may wish to calibrate further (as previously mentioned main area being mains voltage and current). To do this open the Excel spreadsheet and update the values in pink, as needed.
 - Note, changes to any values, which is then recalculated in Excel, will result in a change of the register hex value in Yellow.  Example Ugain.
 
 The below area of code is the main defaults which could be changed:
@@ -60,4 +60,4 @@ Further information can be found:
 - **GitHub**  https://github.com/DitroniX/
 - **Shop**  https://ditronix.net/shop/
 
-Dave Williams | G8PUO | DitroniX 1981-2022 | ditronix.net
+Dave Williams | G8PUO | DitroniX 1981-2023 | ditronix.net
