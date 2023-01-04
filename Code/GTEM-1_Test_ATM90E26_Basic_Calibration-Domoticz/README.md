@@ -11,9 +11,9 @@ This code will
 	
 **Board Hardware Test:**	
 
-- Download Code
-- Open folder in Visual Studio Code | Platform IO
-- Connect the GTEM board USB.  The **platformio.ini** settings should auto select the right board ('Wemos D1 MINI ESP32'and auto detect the right comm port. 
+- Download Code (https://github.com/DitroniX/GTEM-Grid-Tie-Energy-Monitor/archive/refs/heads/main.zip)
+- Open unzipped folder (GTEM-1_Test_ATM90E26_Basic_Calibration-Domoticz), in Visual Studio Code | Platform IO
+- Connect the GTEM board USB.  The **platformio.ini** settings should auto select the right board ('Wemos D1 MINI ESP32'and auto detect the correct comm port. 
    - Compile / Upload
    - Open the Serial Monitor
 - Press 'Reset' on the GTEM Board.  Upon boot, you should see the Diagnostic Page appear in the monitor and values shown.  Ignore the Press board reset to refresh.
@@ -76,8 +76,26 @@ Stages are:
   	 - ActivePower ~ Sensor Type = Useage 
 - **Domoticz.h**
    - WiFi - enter ssid and password
+		- // WiFi.  Setup with your Wirless Information
+		const char *ssid = "xxx";     // network SSID - Case Sensitive
+		const char *password = "xxx"; // network password - Case Sensitive
+		WiFiClient client;                        // Initialize the client library
+		String HostNameHeader = "GTEM-";          // Hostname Prefix
    - Domoticz - enter domoticz_server IP
+		- // Domoticz Server info.  Setup with your Domoticz IP and Port
+		const char *domoticz_server = "0.0.0.0"; // IP Address
+		int port = 8080;                               // Domoticz port
    - Domoticz Devices Indexes - Update    
+   		// Set these values to the Domoticz Devices Indexes (IDX).  If Zero, then entry is ignored. Device needs to be created in Domoticz.
+		int LineVoltage = 0;   // Urms - Line Voltage RMS
+		int LineCurrent = 0;   // Irms - Line Current RMS
+		int ActivePower = 0;   // Pmean - Line Mean Active Power
+		int LineFrequency = 0;  // Freq - Line Voltage Frequency
+		int ImportEnergy = 0;   // APenergy - Forward Active Energy
+		int ExportEnergy = 0;   // ANenergy - Reverse Active Energy
+		int PowerFactor = 0;    // PowerF - Line Power Factor
+		int DCVoltage = 0;      // PCB DC Input (Derived from AC)
+		int PCBTemperature = 0; // PCB NTC- 
   	 - LineVoltage = Index (found in Domoticz > Setup > Devices)
   	 - LineCurrent = Index (found in Domoticz > Setup > Devices)
   	 - ActivePower = Index (found in Domoticz > Setup > Devices)   	 
