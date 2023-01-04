@@ -79,9 +79,9 @@ Stages are:
 - **Domoticz.h**
    - WiFi - enter your routers WiFI ssid and password
    
-		` // WiFi.  Setup with your Wirless Information.
-		 const char *ssid = "xxx";     // network SSID - Case Sensitive
-		 const char *password = "xxx"; // network password - Case Sensitive
+		   // WiFi.  Setup with your Wirless Information.
+		   const char *ssid = "xxx";     // network SSID - Case Sensitive
+		   const char *password = "xxx"; // network password - Case Sensitive
 
 		
    - Domoticz - enter domoticz_server IP (Leave port at default 8080)
