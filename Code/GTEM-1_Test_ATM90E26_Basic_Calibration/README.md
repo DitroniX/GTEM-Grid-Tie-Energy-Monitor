@@ -25,7 +25,7 @@ This code will configure the GTEM board and Test the hardware and ATM90E26 Energ
 
 
 
-Now the above is proven to work, you may wish to calibrate further. To do this open the Excel spreadsheet and update the values in pink, as needed.
+Now the above is proven to work, you may wish to calibrate further (Main area being mains voltage and current). To do this open the Excel spreadsheet and update the values in pink, as needed.
 - Note, changes to any values, which is then recalculated in Excel, will result in a change of the register hex value in Yellow.  Example Ugain.
 
 The below area of code is the main defaults which could be changed:
