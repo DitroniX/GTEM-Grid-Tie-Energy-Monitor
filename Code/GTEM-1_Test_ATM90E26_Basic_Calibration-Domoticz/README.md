@@ -55,9 +55,11 @@ Should you wish to update any register values, you may do so in file **GTEM-1_De
    - By updating the firmware and rebooting, you may be prompted to update CRC1 or CRC2 with new values  
    - Example: Checksum Status (CS1 0x2C): 0xAE71 *ERROR: Please update _crc1 to ATM Calculated CRC: 0xAE70
 - Take note of the CRC1 or CRC2 values (copy) and update (paste) the defaults values as needed.  Example of defaults.
-   - // Calibration Defaults
-   - _crc1 = 0xAE70;
-   - _crc2 = 0xDA60;
+
+	   - // Calibration Defaults
+	   - _crc1 = 0xAE70;
+	   - _crc2 = 0xDA60;
+   
 - Rebuild the code, upload and upon reboot, you should NOT see any CRC errors displayed.
 
 
