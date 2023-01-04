@@ -55,6 +55,9 @@ Should you wish to update any register values, you may do so in file GTEM-1_Defa
    - _crc2 = 0x4BE5;
 - Rebuild the code, upload and upon reboot, you should NOT see any CRC errors displayed.
 
+
+**Thanks to Tisham Dhar, whatnick, for the teams excellent work and providing code extracts, calculations and Energy Setpoint Calculator Excel example.**
+
 A video and further information on calibration to follow.
 
 Further information can be found:
