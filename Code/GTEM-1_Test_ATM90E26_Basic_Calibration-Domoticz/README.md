@@ -112,6 +112,7 @@ Stages are:
    - The code will now loop and fresh Domoticz, based on the LoopDelay value (Default 1 Second)
 
 
+**Thanks to Tisham Dhar, whatnick, for the teams excellent work and providing code extracts, calculations and Energy Setpoint Calculator Excel example.**
 
 
 A video and further information on calibration to follow.
