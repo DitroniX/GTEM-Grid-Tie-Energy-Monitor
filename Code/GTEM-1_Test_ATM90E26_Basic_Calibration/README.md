@@ -1,6 +1,6 @@
 **GTEM ESP32 ATM90E26 Energy Monitor SDK**
 
-** Updated Code in GTEM-1_Test_ATM90E26_Basic_Calibration-Domoticz**
+**Updated Code for Visual Studio Platform IO - in GTEM-1_Test_ATM90E26_Basic_Calibration-Domoticz**
 
 GTEM-1_Test_ATM90E26_Basic_Calibration. The GTEM boards are all tested prior to shipping, based on the below guidance and calibration code.  For this reason, you may only need to tweak mains voltage and current values slightly.
 
