@@ -47,7 +47,7 @@ Should you wish to update any register values, you may do so in file GTEM-1_Defa
    - Example: Checksum Status (CS1 0x2C): 0xAE71 *ERROR: Please update _crc1 to ATM Calculated CRC: 0xAE70
 - Take note of the CRC1 or CRC2 values and update the defaults values as needed.  Example of defaults.
    - // Calibration Defaults
-   - _crc1 = 0xAE71;
+   - _crc1 = 0xAE70;
    - _crc2 = 0x4BE5;
 - Rebuild the code, upload and upon reboot, you should NOT see any CRC errors displayed.
 
