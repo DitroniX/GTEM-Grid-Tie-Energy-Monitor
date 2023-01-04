@@ -1,8 +1,9 @@
 **GTEM ESP32 ATM90E26 Energy Monitor SDK**
 
-GTEM-1_Test_ATM90E26_Basic_Calibration-Domoticz
+GTEM-1_Test_ATM90E26_Basic_Calibration-Domoticz (Visual Studio Platform IO)
 
-This code will: 
+This code will
+
 	1) Configure the GTEM board and Test the ATM90E26 Energy Monitor.  
 	2) Calibrate the ATM90E26, where needed (Based on Energy Setpoint Calculator GTEM Bring-Up Only.xlsx)
 	3) Provide a Register Status and Diagnostic Report (See _Example Report.txt)
