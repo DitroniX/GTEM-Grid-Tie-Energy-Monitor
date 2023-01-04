@@ -1,8 +1,10 @@
 **GTEM ESP32 ATM90E26 Energy Monitor SDK**
 
 ------------
-
+Beta Release
 ![Display-Type-B](https://ditronix.net/wp-content/uploads/2022/11/GTEM-ESP32-ATM90E26-SDK-v1-2211-101-OLED-Test-1536x1112.jpg?raw=true)
+
+Production Release
 ![Display-Type-B](https://ditronix.net/wp-content/uploads/2022/12/GTEM-ESP32-ATM90E26-SDK-v1-2212-104-Under-Test-scaled.jpg?raw=true)
 
 The GTEM Energy Monitoring board main features:
@@ -49,4 +51,4 @@ Further information can be found:
 - **GitHub**  https://github.com/DitroniX/
 - **Shop**  https://ditronix.net/shop/
 
-Dave Williams | G8PUO | DitroniX 1981-2022 | ditronix.net
+Dave Williams | G8PUO | DitroniX 1981-2023 | ditronix.net
