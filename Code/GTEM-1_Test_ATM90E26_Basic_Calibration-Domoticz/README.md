@@ -76,7 +76,7 @@ Stages are:
   	 - ActivePower ~ Sensor Type = Useage 
 - **Domoticz.h**
    - WiFi - enter ssid and password
-   - 
+ 
 		- // WiFi.  Setup with your Wirless Information
 		const char *ssid = "xxx";     // network SSID - Case Sensitive
 		const char *password = "xxx"; // network password - Case Sensitive
@@ -84,13 +84,13 @@ Stages are:
 		String HostNameHeader = "GTEM-";          // Hostname Prefix
 		
    - Domoticz - enter domoticz_server IP
-   - 
+    
 		- // Domoticz Server info.  Setup with your Domoticz IP and Port
 		const char *domoticz_server = "0.0.0.0"; // IP Address
 		int port = 8080;                               // Domoticz port
 		
    - Domoticz Devices Indexes - Update    
-   - 
+   
    		// Set these values to the Domoticz Devices Indexes (IDX).  If Zero, then entry is ignored. Device needs to be created in Domoticz.
 		int LineVoltage = 0;   // Urms - Line Voltage RMS
 		int LineCurrent = 0;   // Irms - Line Current RMS
