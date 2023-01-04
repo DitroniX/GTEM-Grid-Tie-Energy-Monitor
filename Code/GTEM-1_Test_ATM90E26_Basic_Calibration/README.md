@@ -2,6 +2,8 @@
 
 GTEM-1_Test_ATM90E26_Basic_Calibration. The GTEM boards are all tested prior to shipping, based on the below guidance and calibration code.  For this reason, you may only need to tweak mains voltage and current values slightly.
 
+To help you, this basic calibration code will first check hardware and then initialize the ATM90E26, reading the main energy monitor registers and providing a diagnostic report. Some register values are displayed with binary and expanded descriptions too, so making it easier to compare with the datasheet if needed.
+
 This code will configure the GTEM board, Test the hardware and ATM90E26 Energy Monitor.
 
 - Download Code
