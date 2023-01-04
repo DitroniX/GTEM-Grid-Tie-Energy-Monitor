@@ -2,13 +2,13 @@
 
 GTEM-1_Test_ATM90E26_Basic_Calibration-Domoticz (Visual Studio Platform IO)
 
-This code will
+This code will:
 
 	1) Configure the GTEM board and Test the ATM90E26 Energy Monitor.  
 	2) Calibrate the ATM90E26, where needed (Based on Energy Setpoint Calculator GTEM Bring-Up Only.xlsx)
 	3) Provide a Register Status and Diagnostic Report (See _Example Report.txt)
 	4) Update the values to Domoticz (only when EnableDomoticz flag set)
-	
+
 **Board Hardware Test:**	
 
 - Download Code (https://github.com/DitroniX/GTEM-Grid-Tie-Energy-Monitor/archive/refs/heads/main.zip)
@@ -16,7 +16,7 @@ This code will
 - Connect the GTEM board USB.  The **platformio.ini** settings should auto select the right board ('Wemos D1 MINI ESP32'and auto detect the correct comm port. 
    - Compile / Upload
    - Open the Serial Monitor
-- Press 'Reset' on the GTEM Board.  Upon boot, you should see the Diagnostic Page appear in the monitor and values shown.  Ignore the Press board reset to refresh.
+- Press 'Reset' on the GTEM Board.  Upon boot, you should see the Diagnostic Page appear in the serial monitor and values shown.  Press board reset to refresh.
    - Example Line Voltage (Urms 0x49): 0.01 V
    - Example Line Current (Irms 0x48): 0.01 A
    - Example Line Frequency (Freq 0x4C): 102.31 Hz
@@ -77,38 +77,37 @@ Stages are:
   	 - LineCurrent ~ Sensor Type = Ampere (1 Phase)
   	 - ActivePower ~ Sensor Type = Useage 
 - **Domoticz.h**
-   - WiFi - enter ssid and password
- 
-		- // WiFi.  Setup with your Wirless Information
-		- const char *ssid = "xxx";     // network SSID - Case Sensitive
-		- const char *password = "xxx"; // network password - Case Sensitive
-		- WiFiClient client;                        // Initialize the client library
-		- String HostNameHeader = "GTEM-";          // Hostname Prefix
+   - WiFi - enter your routers WiFI ssid and password
+   
+		` // WiFi.  Setup with your Wirless Information.
+		 const char *ssid = "xxx";     // network SSID - Case Sensitive
+		 const char *password = "xxx"; // network password - Case Sensitive
+
 		
-   - Domoticz - enter domoticz_server IP
-    
-		- // Domoticz Server info.  Setup with your Domoticz IP and Port
-		- const char *domoticz_server = "0.0.0.0"; // IP Address
-		- int port = 8080;                               // Domoticz port
-		
+   - Domoticz - enter domoticz_server IP (Leave port at default 8080)
+
+		   // Domoticz Server info.  Setup with your Domoticz IP and Port
+		   const char *domoticz_server = "0.0.0.0"; // IP Address
+		   int port = 8080;                               // Domoticz port`
+		   
    - Domoticz Devices Indexes - Update    
    
-   		// Set these values to the Domoticz Devices Indexes (IDX).  If Zero, then entry is ignored. Device needs to be created in Domoticz.
-		int LineVoltage = 0;   // Urms - Line Voltage RMS
-		int LineCurrent = 0;   // Irms - Line Current RMS
-		int ActivePower = 0;   // Pmean - Line Mean Active Power
-		int LineFrequency = 0;  // Freq - Line Voltage Frequency
-		int ImportEnergy = 0;   // APenergy - Forward Active Energy
-		int ExportEnergy = 0;   // ANenergy - Reverse Active Energy
-		int PowerFactor = 0;    // PowerF - Line Power Factor
-		int DCVoltage = 0;      // PCB DC Input (Derived from AC)
-		int PCBTemperature = 0; // PCB NTC- 
+			// Set these values to the Domoticz Devices Indexes (IDX).  If Zero, then entry is ignored. Device needs to be created in Domoticz.
+			int LineVoltage = 0;   // Urms - Line Voltage RMS
+			int LineCurrent = 0;   // Irms - Line Current RMS
+			int ActivePower = 0;   // Pmean - Line Mean Active Power
+			int LineFrequency = 0;  // Freq - Line Voltage Frequency
+			int ImportEnergy = 0;   // APenergy - Forward Active Energy
+			int ExportEnergy = 0;   // ANenergy - Reverse Active Energy
+			int PowerFactor = 0;    // PowerF - Line Power Factor
+			int DCVoltage = 0;      // PCB DC Input (Derived from AC)
+			int PCBTemperature = 0; // PCB NTC- 
 		
   	 - LineVoltage = Index (found in Domoticz > Setup > Devices)
   	 - LineCurrent = Index (found in Domoticz > Setup > Devices)
   	 - ActivePower = Index (found in Domoticz > Setup > Devices)  
 - **main.cpp**
-   - // Constants > EnableDomoticz = true;
+	  - // Constants > EnableDomoticz = true;`
    - Rebuild the code, upload and upon reboot you should start to publish
    - The code will now loop and fresh Domoticz, based on the LoopDelay value (Default 1 Second)
 
