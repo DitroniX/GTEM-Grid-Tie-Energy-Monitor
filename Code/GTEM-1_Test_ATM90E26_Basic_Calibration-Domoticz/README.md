@@ -79,7 +79,7 @@ Stages are:
 - **Domoticz.h**
    - WiFi - enter your routers WiFI ssid and password
    
-		   // WiFi.  Setup with your Wirless Information.
+		   // WiFi.  Setup with your Wireless Information.
 		   const char *ssid = "xxx";     // network SSID - Case Sensitive
 		   const char *password = "xxx"; // network password - Case Sensitive
 
