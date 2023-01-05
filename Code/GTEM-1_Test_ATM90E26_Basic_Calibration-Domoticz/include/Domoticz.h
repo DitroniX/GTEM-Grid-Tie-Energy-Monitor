@@ -31,7 +31,7 @@
 
 // ****************  VARIABLES / DEFINES / STATIC / STRUCTURES ****************
 
-// WiFi.  Setup with your Wirless Information
+// WiFi.  Setup with your Wireless Information
 const char *ssid = "xxx";     // network SSID - Case Sensitive
 const char *password = "xxx"; // network password - Case Sensitive
 WiFiClient client;                        // Initialize the client library
