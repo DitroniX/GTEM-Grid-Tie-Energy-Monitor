@@ -32,6 +32,8 @@ The GTEM Energy Monitoring board main features:
 - PCB designed to fit into an BMC enclosure
     Also allows for the display to be included, or not.
     Size 65mm x 53m
+    
+![Display-Type-B](https://ditronix.net/wp-content/uploads/2023/01/GTEM-ESP32-ATM90E26-Enery-Monitor-Connections.jpg?raw=true)    
 
 Remember!
 - Our SDKs are WeMos D1 Mini flashing compatible
