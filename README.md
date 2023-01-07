@@ -20,6 +20,7 @@ The GTEM Energy Monitoring board main features:
 - Current Clamp Input
 - AC Low Voltage Input
     Power safely derived from a SELV / Wall AC/AC Power Supply
+    Examples GreenBrook DAT01A or TLC TC TR7
     On-board 3V3 DC Power Supply
 - Arduino D1 Flashing and Programming Compatibility
 - OPTO Input
