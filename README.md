@@ -38,7 +38,7 @@ The GTEM Energy Monitoring board main features:
 
 Remember!
 - Our SDKs are WeMos D1 Mini flashing compatible
-- Set the BOARD to ESP32 DEV Module (or similar).
+- Set the BOARD to ESP32, 'WEMOS D1 MINI ESP32' DEV Module (or similar).
 - You can also set the BAUD rate to 921600 to speed up flashing.
 - The SDK does NOT need external power to flash.  It will take Power from the USB 5V.
 
