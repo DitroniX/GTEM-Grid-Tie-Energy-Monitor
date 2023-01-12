@@ -8,8 +8,7 @@ GTEM Production Release (Board Under Production Test)
 ![Display-Type-B](https://ditronix.net/wp-content/uploads/2022/12/GTEM-ESP32-ATM90E26-SDK-v1-2212-104-Under-Test-scaled.jpg?raw=true)
 
 GTEM 'What Is In The Shipping Box'
-
-#Pic to be uploaded
+![Display-Type-B](https://ditronix.net/wp-content/uploads/2023/01/GTEM-ESP32-ATM90E26-In-The-Box-scaled.jpg?raw=true)
 
 
 The GTEM Energy Monitoring board main features:
