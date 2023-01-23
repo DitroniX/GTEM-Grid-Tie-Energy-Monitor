@@ -2,7 +2,7 @@
   Dave Williams, DitroniX 2019-2023 (ditronix.net)
   GTEM-1 ATM90E26 Energy Monitoring Energy Monitor  v1.0
   Features include ESP32 GTEM ATM90E26 16bit ADC EEPROM OPTO CT-Clamp Current Voltage Frequency Power Factor GPIO I2C OLED SMPS D1 USB
-  PCA 1.2212-104 - Test Code Firmware v1
+  PCA 1.2212-105 - Test Code Firmware v1
 
   The purpose of this test code is to cycle through the various main functions of the board, as shown below, as part of board bring up testing.
 
@@ -10,6 +10,23 @@
   Additional diagnostic serial reporting has been included, for reference and expanded detail.
 
   Instructions.  See GitHub.com/DitroniX or DitroniX.net/Wiki for further information.
+
+    - First Flash this code to a GTEM board and Run code.
+    - Check the Mains Current and Voltage display on the Serial Monitor - Press board Reset to refresh data.
+    - You should find that the values are pretty near what is expected i.e. voltage, current, power etc.
+      - If not, update values, where needed, in the Excel 'Energy Setpoint Calculator GTEM Bring-Up Only.xlsx'.  Typically ONLY UGain or iGain.
+      - Enter new/tweaked UGain (Voltage) and/or iGain (Current).
+      - Update auto calculated Hex value(s) into 'GTEM-1_Defaults.h' > 'Calibration Defaults'.
+      - Reflash code to board.
+      - Run and view CRC values from Serial Monitor. You should see either CRC1 or/both CRC2 change.  
+      - -The Red LED will Flash upon a CRC1 or CRC2 error - indicating you need to update the CRC.
+      - Update CRC1 and/or CRC2 values in 'GTEM-1_Defaults.h' > 'Calibration Defaults'.
+      - Reflash and you should see a change in the values for Current, Voltage and resultant Power (Wattage).
+      - Go back to XLS and update until you are happy that the values are near to your expected actual readings.
+    - Update the Wifi, Domoticz Server and Device Index Values in 'Domoticz.h'.  Creating new Devices first in Domoticz.
+    - Once you are happy with the values, update the 'EnableDomoticz' to 'true'.
+    - - Upon a CRC Error, Updating to Domoticz is suspended.
+    - Reflash code to board.  All done!
 
   Code register formulation based on the excellent ground work from Tisham Dhar, whatnick | ATM90E26 Energy Monitor | Code upgraded and updated by Date Williams
 
@@ -23,28 +40,31 @@
   This test code is OPEN SOURCE and formatted for easier viewing.  Although is is not intended for real world use, it may be freely used, or modified as needed.
   It is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
-  Further information, details and examples can be found on our website wiki pages ditronix.net/wiki and github.com/DitroniX
+  Further information, details and examples can be found on our website wiki pages ditronix.net/wiki and also github.com/DitroniX
 */
 
 // ****************  VARIABLES / DEFINES / STATIC / STRUCTURES / CONSTANTS ****************
+
+// Constants
+boolean CRCErrorFlag = false; // Updated to true if CRC error
+
 // **************** FUNCTIONS / ROUTINES / CLASSES for CALIBRATION ****************
 
 // Calibration Defaults
 ATM90E26_SPI::ATM90E26_SPI(int pin)
 {
   _cs = pin;
-  _lgain = 0x1D39; // Use XLS to calculate these values. Examples: 0x1D39;
-  _ugain = 0xA07E; // Use XLS to calculate these values. Examples: 0xA07E; 0x7AF3; 0xD464;  0xA028;
-  _igain = 0x7A13; // Use XLS to calculate these values. Examples: 0x2F6E; 0x6E49;  0x7DFB; 0x7A13;
-  _crc1 = 0xAE70;  // Important! Run this application, then take auto calculated values and update here
-  _crc2 = 0xF250;  // Important! Run this application, then take auto calculated values and update here
+  _lgain = 0x1D39; // Use XLS to calculate these values, PL CONSTANT. Examples: 0x1D39; 0x1D39
+  _ugain = 0x9E38; // Use XLS to calculate these VOLTAGE RMS values. Examples: 8V 0xA028 | 12V 0x9F9A or 0x9E38
+  _igain = 0x7160; // Use XLS to calculate these CURRENT GAIN values. Examples:  0x7160
+  _crc1 = 0xAE70;  // Important! Run this application, then take auto CRC1 calculated values and update here. Examples: 0xAE70
+  _crc2 = 0xF24C;  // Important! Run this application, then take auto CRC2 calculated values and update here.  Examples: 8V 0xDC3E | 12V 0x51AF or 0xF24C
 }
 
 // Register Defaults
 void ATM90E26_SPI::InitEnergyIC()
 {
   // unsigned short systemstatus;
-
   pinMode(_cs, OUTPUT);
 
   /* Enable SPI */
@@ -99,7 +119,13 @@ void ATM90E26_SPI::InitEnergyIC()
     Serial.print(_crc1, HEX);
     Serial.print("\tPlease change _crc1 to: 0x");
     Serial.println(CommEnergyIC(1, CSOne, 0x0000), HEX);
+    Serial.println("");
+    Serial.println("# IMPORTANT: THE BELOW VALUES ARE ERRONEOUS UNTIL CRC1 IS UPDATED!");
+    Serial.println("##################################################################");
+    Serial.println("");
+    CRCErrorFlag = true;
   }
+  
   if (GetSysStatus() & 0x3000)
   { // Checksum 2 Error
     Serial.println("");
@@ -107,6 +133,11 @@ void ATM90E26_SPI::InitEnergyIC()
     Serial.print(_crc2, HEX);
     Serial.print("\tPlease change _crc2 to: 0x");
     Serial.println(CommEnergyIC(1, CSTwo, 0x0000), HEX);
+    Serial.println("");
+    Serial.println("# IMPORTANT: THE BELOW VALUES ARE ERRONEOUS UNTIL CRC2 IS UPDATED!");
+    Serial.println("##################################################################");
+    Serial.println("");
+    CRCErrorFlag = true;
   }
 
   Serial.println("");

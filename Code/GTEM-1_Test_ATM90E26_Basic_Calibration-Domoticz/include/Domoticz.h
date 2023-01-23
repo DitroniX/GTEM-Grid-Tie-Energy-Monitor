@@ -2,7 +2,7 @@
   Dave Williams, DitroniX 2019-2023 (ditronix.net)
   GTEM-1 ATM90E26 Energy Monitoring Energy Monitor  v1.0
   Features include ESP32 GTEM ATM90E26 16bit ADC EEPROM OPTO CT-Clamp Current Voltage Frequency Power Factor GPIO I2C OLED SMPS D1 USB
-  PCA 1.2212-104 - Test Code Firmware v1
+  PCA 1.2212-105 - Test Code Firmware v1
 
   The purpose of this test code is to cycle through the various main functions of the board, as shown below, as part of board bring up testing.
 
@@ -10,6 +10,23 @@
   Additional diagnostic serial reporting has been included, for reference and expanded detail.
 
   Instructions.  See GitHub.com/DitroniX or DitroniX.net/Wiki for further information.
+
+    - First Flash this code to a GTEM board and Run code.
+    - Check the Mains Current and Voltage display on the Serial Monitor - Press board Reset to refresh data.
+    - You should find that the values are pretty near what is expected i.e. voltage, current, power etc.
+      - If not, update values, where needed, in the Excel 'Energy Setpoint Calculator GTEM Bring-Up Only.xlsx'.  Typically ONLY UGain or iGain.
+      - Enter new/tweaked UGain (Voltage) and/or iGain (Current).
+      - Update auto calculated Hex value(s) into 'GTEM-1_Defaults.h' > 'Calibration Defaults'.
+      - Reflash code to board.
+      - Run and view CRC values from Serial Monitor. You should see either CRC1 or/both CRC2 change.  
+      - -The Red LED will Flash upon a CRC1 or CRC2 error - indicating you need to update the CRC.
+      - Update CRC1 and/or CRC2 values in 'GTEM-1_Defaults.h' > 'Calibration Defaults'.
+      - Reflash and you should see a change in the values for Current, Voltage and resultant Power (Wattage).
+      - Go back to XLS and update until you are happy that the values are near to your expected actual readings.
+    - Update the Wifi, Domoticz Server and Device Index Values in 'Domoticz.h'.  Creating new Devices first in Domoticz.
+    - Once you are happy with the values, update the 'EnableDomoticz' to 'true'.
+    - - Upon a CRC Error, Updating to Domoticz is suspended.
+    - Reflash code to board.  All done!
 
   Code register formulation based on the excellent ground work from Tisham Dhar, whatnick | ATM90E26 Energy Monitor | Code upgraded and updated by Date Williams
 
@@ -23,7 +40,7 @@
   This test code is OPEN SOURCE and formatted for easier viewing.  Although is is not intended for real world use, it may be freely used, or modified as needed.
   It is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
-  Further information, details and examples can be found on our website wiki pages ditronix.net/wiki and github.com/DitroniX
+  Further information, details and examples can be found on our website wiki pages ditronix.net/wiki and also github.com/DitroniX
 */
 
 // Libraries
@@ -32,28 +49,31 @@
 // ****************  VARIABLES / DEFINES / STATIC / STRUCTURES ****************
 
 // WiFi.  Setup with your Wireless Information
-const char *ssid = "xxx";     // network SSID - Case Sensitive
-const char *password = "xxx"; // network password - Case Sensitive
-WiFiClient client;                        // Initialize the client library
-String HostNameHeader = "GTEM-";          // Hostname Prefix
+const char *ssid = "xxxx";      // network SSID - Case Sensitive
+const char *password = "xxxx"; // network password - Case Sensitive
+WiFiClient client;                  // Initialize the client library
+String HostNameHeader = "GTEM-";    // Hostname Prefix
 
 // Domoticz Server info.  Setup with your Domoticz IP and Port
 const char *domoticz_server = "0.0.0.0"; // IP Address
-int port = 8080;                               // Domoticz port
+int port = 8080;                              // Domoticz port
+boolean EnableDomoticz = false; // Change the true to enable Loop and sending data to Domoticz.
 
 // Set these values to the Domoticz Devices Indexes (IDX).  If Zero, then entry is ignored. Device needs to be created in Domoticz.
-int LineVoltage = 0;   // Urms - Line Voltage RMS
-int LineCurrent = 0;   // Irms - Line Current RMS
-int ActivePower = 0;   // Pmean - Line Mean Active Power
-int LineFrequency = 0;  // Freq - Line Voltage Frequency
-int ImportEnergy = 0;   // APenergy - Forward Active Energy
-int ExportEnergy = 0;   // ANenergy - Reverse Active Energy
-int PowerFactor = 0;    // PowerF - Line Power Factor
+int LineVoltage = 0;    // Urms - Line Voltage RMS
+int LineCurrent = 0;    // Irms - Line Current RMS
+int ActivePower = 0;    // Pmean - Line Mean Active Power
+int ImportPower = 0;    // Pmean - Line Mean Active Import Power
+int ExportPower = 0;    // Pmean - Line Mean Active Export Power
+int LineFrequency = 0;   // Freq - Line Voltage Frequency
+int ImportEnergy = 0;    // APenergy - Forward Active Energy
+int ExportEnergy = 0;    // ANenergy - Reverse Active Energy
+int PowerFactor = 0;     // PowerF - Line Power Factor
 int DCVoltage = 0;      // PCB DC Input (Derived from AC)
 int PCBTemperature = 0; // PCB NTC
 
-// Set this value to the Domoticz Device Group Index (IDX)
-int DomoticzBaseIndex = 0; // Currently Unused.  If Zero, then entry is ignored.  Group device needs to be created in Domoticz. WIP.
+// Set this value to the Domoticz Device Group Index (IDX) - Note: Currently Unused Virtual Device.
+int DomoticzBaseIndex = 0; // If Zero, then entry is ignored.  Group device needs to be created in Domoticz. WIP.
 
 // ######### FUNCTIONS #########
 
@@ -66,7 +86,8 @@ void InitialiseWiFi()
         Serial.println("Attempting to connect to " + String(ssid));
 
         // Force Hostname
-        String Hostname = HostNameHeader + WiFi.macAddress().substring(WiFi.macAddress().length() - 5, WiFi.macAddress().length());
+        String Hostname = HostNameHeader;
+        Hostname.concat(WiFi.macAddress().substring(WiFi.macAddress().length() - 5, WiFi.macAddress().length()));
         Hostname.replace(":", "");
         WiFi.setHostname(Hostname.c_str());
 
@@ -86,7 +107,7 @@ void InitialiseWiFi()
 
         // Wifi Information
         Serial.println("Connection Details:");
-        Serial.println("WiFi SSID \t " + String(ssid)) + "(Wifi Station Mode)";
+        Serial.println("WiFi SSID \t " + String(ssid) + "(Wifi Station Mode)");
         Serial.printf("WiFi IP \t %s\n", WiFi.localIP().toString().c_str());
         Serial.printf("WiFi GW \t %s\n", WiFi.gatewayIP().toString().c_str());
         Serial.printf("WiFi MASK \t %s\n", WiFi.subnetMask().toString().c_str());
@@ -98,7 +119,7 @@ void InitialiseWiFi()
 }
 
 // Publish to Domoticz - Single Values
-void PublishDomoticz(int Sensor_Index, float Sensor_Value)
+void PublishDomoticz(int Sensor_Index, float Sensor_Value, String Sensor_Name = "")
 {
 
     if (Sensor_Index > 0)
@@ -108,7 +129,9 @@ void PublishDomoticz(int Sensor_Index, float Sensor_Value)
             Serial.print("Sending Message to Domoticz #");
             Serial.print(Sensor_Index);
             Serial.print(" ");
-            Serial.println(Sensor_Value);
+            Serial.print(Sensor_Value);
+            Serial.print(" \t");
+            Serial.println(Sensor_Name);
 
             client.print("GET /json.htm?type=command&param=udevice&idx=");
             client.print(Sensor_Index);

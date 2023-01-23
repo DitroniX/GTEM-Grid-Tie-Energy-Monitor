@@ -2,7 +2,7 @@
   Dave Williams, DitroniX 2019-2023 (ditronix.net)
   GTEM-1 ATM90E26 Energy Monitoring Energy Monitor  v1.0
   Features include ESP32 GTEM ATM90E26 16bit ADC EEPROM OPTO CT-Clamp Current Voltage Frequency Power Factor GPIO I2C OLED SMPS D1 USB
-  PCA 1.2212-104 - Test Code Firmware v1
+  PCA 1.2212-105 - Test Code Firmware v1
 
   The purpose of this test code is to cycle through the various main functions of the board, as shown below, as part of board bring up testing.
 
@@ -10,6 +10,23 @@
   Additional diagnostic serial reporting has been included, for reference and expanded detail.
 
   Instructions.  See GitHub.com/DitroniX or DitroniX.net/Wiki for further information.
+
+    - First Flash this code to a GTEM board and Run code.
+    - Check the Mains Current and Voltage display on the Serial Monitor - Press board Reset to refresh data.
+    - You should find that the values are pretty near what is expected i.e. voltage, current, power etc.
+      - If not, update values, where needed, in the Excel 'Energy Setpoint Calculator GTEM Bring-Up Only.xlsx'.  Typically ONLY UGain or iGain.
+      - Enter new/tweaked UGain (Voltage) and/or iGain (Current).
+      - Update auto calculated Hex value(s) into 'GTEM-1_Defaults.h' > 'Calibration Defaults'.
+      - Reflash code to board.
+      - Run and view CRC values from Serial Monitor. You should see either CRC1 or/both CRC2 change.  
+      - -The Red LED will Flash upon a CRC1 or CRC2 error - indicating you need to update the CRC.
+      - Update CRC1 and/or CRC2 values in 'GTEM-1_Defaults.h' > 'Calibration Defaults'.
+      - Reflash and you should see a change in the values for Current, Voltage and resultant Power (Wattage).
+      - Go back to XLS and update until you are happy that the values are near to your expected actual readings.
+    - Update the Wifi, Domoticz Server and Device Index Values in 'Domoticz.h'.  Creating new Devices first in Domoticz.
+    - Once you are happy with the values, update the 'EnableDomoticz' to 'true'.
+    - - Upon a CRC Error, Updating to Domoticz is suspended.
+    - Reflash code to board.  All done!
 
   Code register formulation based on the excellent ground work from Tisham Dhar, whatnick | ATM90E26 Energy Monitor | Code upgraded and updated by Date Williams
 
@@ -23,7 +40,7 @@
   This test code is OPEN SOURCE and formatted for easier viewing.  Although is is not intended for real world use, it may be freely used, or modified as needed.
   It is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
-  Further information, details and examples can be found on our website wiki pages ditronix.net/wiki and github.com/DitroniX
+  Further information, details and examples can be found on our website wiki pages ditronix.net/wiki and also github.com/DitroniX
 */
 
 // Libraries
@@ -39,9 +56,9 @@
 // ****************  VARIABLES / DEFINES / STATIC / STRUCTURES ****************
 
 // App
-String AppVersion = "GTEM Test 230104";
-String AppBuild = "DitroniX GTEM-1 ATM90E26 SDK";
-String AppName = "GTEM Energy Monitor - Domoticz";
+String AppVersion = "GTEM Test 230123";
+String AppBuild = "DitroniX GTEM-1 ATM90E26 SDK Board";
+String AppName = "GTEM Energy Monitor - Calibration and Domoticz";
 
 // Variables
 unsigned short ReadValue;
@@ -54,7 +71,6 @@ float TemperatureF;
 const int LoopDelay = 1;     // Loop Delay in Seconds
 float ADC_Constant = 31.340; // Adjust as needed for calibration of VDC_IN.
 uint64_t chipid = ESP.getEfuseMac();
-boolean EnableDomoticz = false; // Change the true to enable Loop and sending data to Domoticz.
 
 // **************** INPUTS ****************
 #define DCV_IN 36 // GPIO 36 (Analog VP / ADC 1 CH0)
@@ -297,9 +313,24 @@ void DisplayRegisters()
   Serial.println(" Hz");
 
   yield();
-  Serial.print("Active power \t\t\t(Pmean 0x4A):\t\t");
-  Serial.print(eic.GetActivePower());
+  ReadFloat = eic.GetActivePower();
+  Serial.print("Active Power \t\t\t(Pmean 0x4A):\t\t");
+  Serial.print(ReadFloat);
   Serial.println(" W");
+
+  yield();
+  ReadFloat = eic.GetImportPower();
+  Serial.print("Import Power \t\t\t(Pmean 0x4A +):\t\t");
+  Serial.print(ReadFloat);
+  Serial.println(" W");
+
+  yield();
+  ReadFloat = eic.GetExportPower();
+  Serial.print("Export Power \t\t\t(Pmean 0x4A -):\t\t");
+  Serial.print(ReadFloat);
+  Serial.println(" W");
+
+  Serial.println("-----------");
 
   yield();
   Serial.print("Import Energy \t\t\t(APenergy 0x40):\t");
@@ -409,60 +440,74 @@ void PublishRegisters()
     if (LineVoltage > 0)
     {
       ReadFloat = eic.GetLineVoltage();
-      PublishDomoticz(LineVoltage, ReadFloat);
+      PublishDomoticz(LineVoltage, ReadFloat, "LineVoltage");
       yield();
     }
 
     if (LineCurrent > 0)
     {
       ReadFloat = eic.GetLineCurrent();
-      PublishDomoticz(LineCurrent, ReadFloat);
+      PublishDomoticz(LineCurrent, ReadFloat, "LineCurrent");
       yield();
     }
 
     if (ActivePower > 0)
     {
       ReadFloat = eic.GetActivePower();
-      PublishDomoticz(ActivePower, ReadFloat);
+      PublishDomoticz(ActivePower, ReadFloat, "ActivePower");
+      yield();
+    }
+
+    if (ImportPower > 0)
+    {
+      ReadFloat = eic.GetImportPower();
+      PublishDomoticz(ImportPower, ReadFloat, "ImportPower");
+      yield();
+    }
+
+    if (ExportPower > 0)
+    {
+      ReadFloat = eic.GetExportPower();
+      PublishDomoticz(ExportPower, ReadFloat, "ExportPower");
       yield();
     }
 
     if (LineFrequency > 0)
     {
       ReadFloat = eic.GetFrequency();
-      PublishDomoticz(LineFrequency, ReadFloat);
+      PublishDomoticz(LineFrequency, ReadFloat, "LineFrequency");
       yield();
     }
 
     if (ImportEnergy > 0)
     {
       ReadFloat = eic.GetImportEnergy();
-      PublishDomoticz(ImportEnergy, ReadFloat);
+      PublishDomoticz(ImportEnergy, ReadFloat, "ImportEnergy");
       yield();
     }
 
     if (ExportEnergy > 0)
     {
       ReadFloat = eic.GetExportEnergy();
-      PublishDomoticz(ExportEnergy, ReadFloat);
+      PublishDomoticz(ExportEnergy, ReadFloat, "ExportEnergy");
       yield();
     }
 
     if (PowerFactor > 0)
     {
       ReadFloat = eic.GetPowerFactor();
-      PublishDomoticz(PowerFactor, ReadFloat);
+      PublishDomoticz(PowerFactor, ReadFloat, "PowerFactor");
       yield();
     }
 
     // ReadADCVoltage();
     if (DCVoltage > 0)
-      PublishDomoticz(DCVoltage, ADC_Voltage);
+      PublishDomoticz(DCVoltage, ADC_Voltage, "DCVoltage");
     yield();
 
     // ReadTemperature();
     if (PCBTemperature > 0)
-      PublishDomoticz(PCBTemperature, TemperatureC);
+      PublishDomoticz(PCBTemperature, TemperatureC, "PCBTemperature");
 
     // Batch or Group Device
     if (DomoticzBaseIndex > 0)
@@ -472,6 +517,8 @@ void PublishRegisters()
   {
     InitialiseWiFi();
   }
+
+  Serial.println("");
 }
 
 void ScanI2CBus()
@@ -616,21 +663,30 @@ void setup()
 // **************** LOOP ****************
 void loop()
 {
-  if (EnableDomoticz == true)
+
+  // LED Red Flashing if CRC Error
+  if (CRCErrorFlag)
   {
-    // PublishRegisters
-    ReadTemperature();  // Read PCB NTC Temperature
-    ReadADCVoltage();   // Read AC>DC Input Voltage
-    PublishRegisters(); // Publish to Domoticz
+    digitalWrite(LED_Red, HIGH);
+    delay(200);
+    digitalWrite(LED_Red, LOW);
+    delay(200);
   }
+  else
+  {
+    if (EnableDomoticz == true)
+    {
+      // PublishRegisters
+      ReadTemperature();  // Read PCB NTC Temperature
+      ReadADCVoltage();   // Read AC>DC Input Voltage
+      PublishRegisters(); // Publish to Domoticz
+    }
+    // Heatbeat LED
+    digitalWrite(LED_Blue, LOW);
+    delay(50);
+    digitalWrite(LED_Blue, HIGH);
 
-  // Serial.print(".");
-
-  // Heatbeat LED
-  digitalWrite(LED_Red, LOW);
-  delay(50);
-  digitalWrite(LED_Red, HIGH);
-
-  // Loop Delay
-  delay(LoopDelay * 1000);
+    // Loop Delay
+    delay(LoopDelay * 1000);
+  }
 }
