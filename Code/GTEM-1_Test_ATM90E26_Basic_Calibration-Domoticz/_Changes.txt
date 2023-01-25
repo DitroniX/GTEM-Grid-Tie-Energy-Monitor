@@ -8,6 +8,10 @@
 
   Simplified Board Bring Up Test -GTEM ATM90E26 Energy Monitor ASIC - Basic Calibration Limits.  Requires Calibration.
   Additional diagnostic serial reporting has been included, for reference and expanded detail.
+  Three Modes:
+    1 Calibration One upon Reset
+     - User Button can be used to force single update the Display Registers.
+    2 Domoticz Publish (Loop)
 
   Instructions.  See GitHub.com/DitroniX or DitroniX.net/Wiki for further information.
 
@@ -18,14 +22,11 @@
       - Enter new/tweaked UGain (Voltage) and/or iGain (Current).
       - Update auto calculated Hex value(s) into 'GTEM-1_Defaults.h' > 'Calibration Defaults'.
       - Reflash code to board.
-      - Run and view CRC values from Serial Monitor. You should see either CRC1 or/both CRC2 change.  
-      - -The Red LED will Flash upon a CRC1 or CRC2 error - indicating you need to update the CRC.
-      - Update CRC1 and/or CRC2 values in 'GTEM-1_Defaults.h' > 'Calibration Defaults'.
-      - Reflash and you should see a change in the values for Current, Voltage and resultant Power (Wattage).
+      - The Red LED will Flash upon a CRC1 or CRC2 error and then AUTOMATICALLY update the EEPROM and Reboot.
+      - You should see a change in the values for Current, Voltage and resultant Power (Wattage).
       - Go back to XLS and update until you are happy that the values are near to your expected actual readings.
     - Update the Wifi, Domoticz Server and Device Index Values in 'Domoticz.h'.  Creating new Devices first in Domoticz.
     - Once you are happy with the values, update the 'EnableDomoticz' to 'true'.
-    - - Upon a CRC Error, Updating to Domoticz is suspended.
     - Reflash code to board.  All done!
 
   Code register formulation based on the excellent ground work from Tisham Dhar, whatnick | ATM90E26 Energy Monitor | Code upgraded and updated by Date Williams
@@ -43,7 +44,7 @@
   Further information, details and examples can be found on our website wiki pages ditronix.net/wiki and also github.com/DitroniX
 */
 
-
+230125 - AT24C64 EEPROM  Enabled.  Automatic CRC Update Upon Calibration Default Changes.  Various Small Code Updates
 230121 - Various Small Code Updates.  Import/Export Power. Improvements to Domoticz.  Setup for 8V AC In.
 230103 - Code Updates and Calibration Info
 230103 - Updated to Platform IO and added support for Domoticz

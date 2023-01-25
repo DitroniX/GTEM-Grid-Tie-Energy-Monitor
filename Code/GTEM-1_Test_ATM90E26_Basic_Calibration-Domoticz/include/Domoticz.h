@@ -4,38 +4,7 @@
   Features include ESP32 GTEM ATM90E26 16bit ADC EEPROM OPTO CT-Clamp Current Voltage Frequency Power Factor GPIO I2C OLED SMPS D1 USB
   PCA 1.2212-105 - Test Code Firmware v1
 
-  The purpose of this test code is to cycle through the various main functions of the board, as shown below, as part of board bring up testing.
-
-  Simplified Board Bring Up Test -GTEM ATM90E26 Energy Monitor ASIC - Basic Calibration Limits.  Requires Calibration.
-  Additional diagnostic serial reporting has been included, for reference and expanded detail.
-
-  Instructions.  See GitHub.com/DitroniX or DitroniX.net/Wiki for further information.
-
-    - First Flash this code to a GTEM board and Run code.
-    - Check the Mains Current and Voltage display on the Serial Monitor - Press board Reset to refresh data.
-    - You should find that the values are pretty near what is expected i.e. voltage, current, power etc.
-      - If not, update values, where needed, in the Excel 'Energy Setpoint Calculator GTEM Bring-Up Only.xlsx'.  Typically ONLY UGain or iGain.
-      - Enter new/tweaked UGain (Voltage) and/or iGain (Current).
-      - Update auto calculated Hex value(s) into 'GTEM-1_Defaults.h' > 'Calibration Defaults'.
-      - Reflash code to board.
-      - Run and view CRC values from Serial Monitor. You should see either CRC1 or/both CRC2 change.  
-      - -The Red LED will Flash upon a CRC1 or CRC2 error - indicating you need to update the CRC.
-      - Update CRC1 and/or CRC2 values in 'GTEM-1_Defaults.h' > 'Calibration Defaults'.
-      - Reflash and you should see a change in the values for Current, Voltage and resultant Power (Wattage).
-      - Go back to XLS and update until you are happy that the values are near to your expected actual readings.
-    - Update the Wifi, Domoticz Server and Device Index Values in 'Domoticz.h'.  Creating new Devices first in Domoticz.
-    - Once you are happy with the values, update the 'EnableDomoticz' to 'true'.
-    - - Upon a CRC Error, Updating to Domoticz is suspended.
-    - Reflash code to board.  All done!
-
-  Code register formulation based on the excellent ground work from Tisham Dhar, whatnick | ATM90E26 Energy Monitor | Code upgraded and updated by Date Williams
-
-  Remember!
-  Set the BOARD to ESP32, 'WEMOS D1 MINI ESP32' DEV Module (or similar).
-  You may set the BAUD rate to 921600 to speed up flashing.
-  The SDK does NOT need external power to flash.  It will take Power from the USB 5V.
-
-  Note: In the default state, upon first power up and during reset, the Green LED may be partially lit. Once programmed and the GPIO defined, the Green LED will go off after power up.
+  Full header information in main.cpp.
 
   This test code is OPEN SOURCE and formatted for easier viewing.  Although is is not intended for real world use, it may be freely used, or modified as needed.
   It is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.

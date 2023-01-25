@@ -1,49 +1,50 @@
-GTEM Test 230121 Initialized
-DitroniX GTEM-1 ATM90E26 SDK
-GTEM Energy Monitor - Domoticz
+GTEM Test 230125 Initialized
+DitroniX GTEM-1 ATM90E26 SDK Board
+GTEM Energy Monitor - Calibration and Domoticz
 GTEM Hardware Setup and Power-Up Test
 
 Testing RGB LED
 Scanning I2C Bus for Devices ...
 I2C device found at address Decimal 80 = Hex 0x50 EEPROM
 I2C Bus Scan Complete
-EEPROM Test Read Value = 0xFF Read OK.  Possible Blank EEPROM
+
+EEPROM Reading CRC1: AE70  CRC2: 577
 
 
-GTEM-1 ATM90E26 Energy Monitoring Energy Monitor - Register Status and Diagnostic Report
-ESP32 Serial ID = F8420A1B5AE0   Firmware Version = GTEM Test 230121
+GTEM-1 ATM90E26 Energy Monitoring Energy Monitor
+Register Status and Diagnostic Report
+ESP32 Serial ID = XXXXXXXX   Firmware Version = GTEM Test 230125
 
 Register Name                   Var/Address             Value / Binary / Information
 ------------                    -----------             --------------------------------------------------------
-System Status                   (SysStatus 0x01):       0x0000 0000000000000000
+System Status                   (SysStatus 0x01):       0x0000 0000000000000000 
 >ATM 0x01 - #0000 System Status Default Value
-Meter Status                    (EnStatus 0x46):        0x2801 0010100000000001 LNMode.FixedL Lline.AntiTamperL RevP.CF1ActiveForward RevQ.CF2ReActiveReverse Pnoload.NoLoadNotActive Qnoload.NotReactiveNoLoad
->ATM 0x46- #2801 Accumulator Populated
-MMode Status                    (MMode 0x2B):           0x9422 1001010000100010 MMode.AllZeroCrossing MMode.LNSel.LLine(Default) MMode.NLine.CurrentGain1 MMode.CurrentChannelGain1
+Meter Status                    (EnStatus 0x46):        0x1801 0001100000000001 LNMode.FixedL Lline.AntiTamperL RevP.CF1ActiveReverse RevQ.CF2ReActiveForward Pnoload.NoLoadNotActive Qnoload.NotReactiveNoLoad 
+MMode Status                    (MMode 0x2B):           0x9422 1001010000100010 MMode.AllZeroCrossing MMode.LNSel.LLine(Default) MMode.NLine.CurrentGain1 MMode.CurrentChannelGain1 
 >ATM 0x2B - #9422 MMode Default Value
 -----------
 Calibraration Status            (CalStart 0x20):        0x8765 1000011101100101 RUNNING | Normal Metering Mode
-UGain Calibration Value         (UGain 0x31):           0xA028 UGain Possible Value Error
-LGain Calibration Value         (LGain 0x23):           0x1D39
-IGain Calibration Value         (IgainL 0x32):          0x7160
-Checksum Status                 (CS1 0x2C):             0xAE70
-Checksum Status                 (CS2 0x3B):             0xDC3E
+UGain Calibration Value         (UGain 0x31):           0x9F9A UGain Possible Value Error
+LGain Calibration Value         (LGain 0x23):           0x1D39 
+IGain Calibration Value         (IgainL 0x32):          0x2F6A 
+Checksum Status                 (CS1 0x2C):             0xAE70 
+Checksum Status                 (CS2 0x3B):             0x0577 
 -----------
-Line Voltage                    (Urms 0x49):            247.83 V
-Line Current                    (Irms 0x48):            1.69 A
-Line Frequency                  (Freq 0x4C):            50.15 Hz
-Active Power                    (Pmean 0x4A):           402.00 W
-Import Power                    (Pmean 0x4A +):         402.00 W
-Export Power                    (Pmean 0x4A -):         0.00 W
+Line Voltage                    (Urms 0x49):            247.13 V
+Line Current                    (Irms 0x48):            0.21 A
+Line Frequency                  (Freq 0x4C):            49.97 Hz
+Active Power                    (Pmean 0x4A):           -49.00 W
+Import Power                    (Pmean 0x4A +):         0.00 W
+Export Power                    (Pmean 0x4A -):         49.00 W
 -----------
 Import Energy                   (APenergy 0x40):        0.00
 Export Energy                   (ANenergy 0x41):        0.00
-Power Factor                    (PowerF 0x4D):          0.96
+Power Factor                    (PowerF 0x4D):          -0.95
 -----------
 Abs Active Energy               (ATenergy 0x42):        0.00
 Abs Reactive Energy             (Rtenergy 0x45):        0.00
 Abs Reactive Forward Energy     (RPenergy 0x43):        0.00
-LSB RMS/Power                   (LSB 0x08):             0xC100 49408
+LSB RMS/Power                   (LSB 0x08):             0x4500 17664
 -----------
-DC Voltage Sensor               (DCV_IN VP):            13.26 V AC/DC Input
-PCB Temperature Sensor          (NTC_IN VN):            20.31 ºC
+DC Voltage Sensor               (DCV_IN VP):            13.81 V AC/DC Input
+PCB Temperature Sensor          (NTC_IN VN):            25.10 ºC

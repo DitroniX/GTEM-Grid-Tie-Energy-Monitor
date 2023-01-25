@@ -8,6 +8,10 @@
 
   Simplified Board Bring Up Test -GTEM ATM90E26 Energy Monitor ASIC - Basic Calibration Limits.  Requires Calibration.
   Additional diagnostic serial reporting has been included, for reference and expanded detail.
+  Three Modes:
+    1 Calibration One upon Reset
+     - User Button can be used to force single update the Display Registers.
+    2 Domoticz Publish (Loop)
 
   Instructions.  See GitHub.com/DitroniX or DitroniX.net/Wiki for further information.
 
@@ -18,14 +22,11 @@
       - Enter new/tweaked UGain (Voltage) and/or iGain (Current).
       - Update auto calculated Hex value(s) into 'GTEM-1_Defaults.h' > 'Calibration Defaults'.
       - Reflash code to board.
-      - Run and view CRC values from Serial Monitor. You should see either CRC1 or/both CRC2 change.  
-      - -The Red LED will Flash upon a CRC1 or CRC2 error - indicating you need to update the CRC.
-      - Update CRC1 and/or CRC2 values in 'GTEM-1_Defaults.h' > 'Calibration Defaults'.
-      - Reflash and you should see a change in the values for Current, Voltage and resultant Power (Wattage).
+      - The Red LED will Flash upon a CRC1 or CRC2 error and then AUTOMATICALLY update the EEPROM and Reboot.
+      - You should see a change in the values for Current, Voltage and resultant Power (Wattage).
       - Go back to XLS and update until you are happy that the values are near to your expected actual readings.
     - Update the Wifi, Domoticz Server and Device Index Values in 'Domoticz.h'.  Creating new Devices first in Domoticz.
     - Once you are happy with the values, update the 'EnableDomoticz' to 'true'.
-    - - Upon a CRC Error, Updating to Domoticz is suspended.
     - Reflash code to board.  All done!
 
   Code register formulation based on the excellent ground work from Tisham Dhar, whatnick | ATM90E26 Energy Monitor | Code upgraded and updated by Date Williams
@@ -48,7 +49,7 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <driver/adc.h>
-#include <EEPROM.h>
+#include <GTEM-EEPROM.h>
 #include <EnergyATM90E26.h>
 #include <GTEM-1_Defaults.h>
 #include <Domoticz.h>
@@ -56,7 +57,7 @@
 // ****************  VARIABLES / DEFINES / STATIC / STRUCTURES ****************
 
 // App
-String AppVersion = "GTEM Test 230123";
+String AppVersion = "GTEM Test 230125";
 String AppBuild = "DitroniX GTEM-1 ATM90E26 SDK Board";
 String AppName = "GTEM Energy Monitor - Calibration and Domoticz";
 
@@ -73,28 +74,35 @@ float ADC_Constant = 31.340; // Adjust as needed for calibration of VDC_IN.
 uint64_t chipid = ESP.getEfuseMac();
 
 // **************** INPUTS ****************
-#define DCV_IN 36 // GPIO 36 (Analog VP / ADC 1 CH0)
-#define NTC_IN 39 // GPIO 39/VN (Analog ADC 1 CH3)
+#define DCV_IN 36      // GPIO 36 (Analog VP / ADC 1 CH0)
+#define NTC_IN 39      // GPIO 39/VN (Analog ADC 1 CH3)
+#define User_Button 26 // GPIO 26 (DAC2)
+#define User_Jumper 25 // GPIO 25 (DAC1)
+#define OPTO_IN 33     // GPIO 33 (Digital ADC 1 CH5)
+#define ATM_WO 27      // GPIO 28 (Digital ADC 2 CH7)
+#define ATM_CF1 34     // GPIO 34 (Digital ADC 1 CH6)
+#define ATM_CF2 35     // GPIO 35 (Digital ADC 1 CH7)
 
 // **************** OUTPUTS ****************
 #define LED_Red 2   // Red LED
 #define LED_Green 4 // Green LED
 #define LED_Blue 15 // Blue LED
 
+// **************** GPIO ****************
+#define USR_GP12 12 // GPIO 12 (Digital TBC)
+#define USR_GP14 14 // GPIO 14 (Digital TBC)
+
 // Define I2C (Expansion Port)
 #define I2C_SDA 21
 #define I2C_SCL 22
-
-// EEPROM
-#define EEPROM_SIZE 1
 
 // ######### OBJECTS #########
 ATM90E26_SPI eic;
 
 // **************** FUNCTIONS AND ROUTINES ****************
 
-void DisplayBIN16(int var)
-{ // Display BIN from Var
+void DisplayBIN16(int var) // Display BIN from Var
+{
   for (unsigned int i = 0x8000; i; i >>= 1)
   {
     Serial.write(var & i ? '1' : '0');
@@ -102,8 +110,8 @@ void DisplayBIN16(int var)
   Serial.print(" ");
 }
 
-void DisplayHEX(unsigned long var, unsigned char numChars)
-{ // Display Hex from Var
+void DisplayHEX(unsigned long var, unsigned char numChars) // Display Hex from Var
+{
   unsigned long mask = 0x0000000F;
   mask = mask << 4 * (numChars - 1);
 
@@ -115,11 +123,20 @@ void DisplayHEX(unsigned long var, unsigned char numChars)
   Serial.print(" ");
 }
 
-void DisplayRegisters()
-{ // Display Diagnostic Report
+void DisplayRegisters() // Display Diagnostic Report
+{
+  // Heatbeat Green LED and Provide ATM Stablising Time
+  digitalWrite(LED_Green, LOW);
+  delay(250);
+  digitalWrite(LED_Green, HIGH);
+  delay(250);
+  digitalWrite(LED_Green, LOW);
+  delay(250);
+  digitalWrite(LED_Green, HIGH);
 
   // Header
-  Serial.println("GTEM-1 ATM90E26 Energy Monitoring Energy Monitor - Register Status and Diagnostic Report");
+  Serial.println("GTEM-1 ATM90E26 Energy Monitoring Energy Monitor");
+  Serial.println("Register Status and Diagnostic Report");
   Serial.printf("ESP32 Serial ID = %04X", (uint16_t)(chipid >> 32));
   Serial.printf("%08X", (uint32_t)chipid);
   Serial.print("   Firmware Version = ");
@@ -572,18 +589,6 @@ void ScanI2CBus()
   }
 }
 
-void ReadEEPROM()
-{ // Read EEPROM Test
-  Serial.print("EEPROM Test Read Value = 0x");
-  ReadValue = EEPROM.read(0);
-  Serial.print(ReadValue, HEX);
-  if (ReadValue == 0x00)
-    Serial.print(" Possible EEPROM Issue?"); // Blank New EEPROM should normally return 0xFF
-  if (ReadValue == 0xFF)
-    Serial.print(" Read OK.  Possible Blank EEPROM");
-  Serial.println();
-}
-
 void ReadTemperature()
 {
   int Vo;
@@ -640,13 +645,10 @@ void setup()
   // Initialize I2C
   Wire.begin(I2C_SDA, I2C_SCL);
 
-  // Initialize EEPROM
-  EEPROM.begin(EEPROM_SIZE);
-
   // Hardware Tests
-  TestRGB();    // Cycle RGB LED
-  ScanI2CBus(); // Scan I2C Bus and Report Devices
-  ReadEEPROM(); // Read EPROM Test
+  TestRGB();          // Cycle RGB LED
+  ScanI2CBus();       // Scan I2C Bus and Report Devices
+  InitializeEEPROM(); // Initialize EEPROM
 
   /*Initialise ATM90E26 + SPI port */
   eic.InitEnergyIC();
@@ -657,7 +659,7 @@ void setup()
   ReadTemperature(); // Read PCB NTC Temperature
   ReadADCVoltage();  // Read AC>DC Input Voltage
 
-  DisplayRegisters(); // Display Registers Once
+  DisplayRegisters(); // Display Registers Once.  Update CRC if required and store in EEPROM.
 }
 
 // **************** LOOP ****************
