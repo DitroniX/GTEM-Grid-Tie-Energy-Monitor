@@ -35,7 +35,7 @@ float TestCount = 0;
 
 // OLED Instance. You will need to select your OLED Display. 
 // Uncomment/Comment as needed.
-GyverOLED<SSD1306_128x32, OLED_BUFFER> oled; //0.69"
+GyverOLED<SSD1306_128x32, OLED_BUFFER> oled; //0.6"
 //GyverOLED<SSD1306_128x32, OLED_NO_BUFFER> oled;
 //GyverOLED<SSD1306_128x64, OLED_BUFFER> oled;
 //GyverOLED<SSD1306_128x64, OLED_NO_BUFFER> oled;
