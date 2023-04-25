@@ -13,9 +13,10 @@ Features include ESP32, GTEM, ATM90E26, 16bit ADC, EEPROM, OPTO, CT-Clamp, Curre
 
 Further information can be found:
 
-Website https://ditronix.net/
-WIKI https://ditronix.net/wiki/
-GitHub https://github.com/DitroniX
-Shop https://ditronix.net/shop/
+- **Website** https://ditronix.net/
+- **WIKI**  https://ditronix.net/wiki/
+- **GitHub**  https://github.com/DitroniX/
+- **Shop**  https://ditronix.net/shop/
+- **Hackster.io** https://www.hackster.io/ditronix
 
 Dave Williams | G8PUO | DitroniX 1981-2023 | ditronix.net
