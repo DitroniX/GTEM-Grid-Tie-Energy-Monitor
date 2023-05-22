@@ -42,9 +42,10 @@
   It is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
   Further information, details and examples can be found on our website wiki pages ditronix.net/wiki and also github.com/DitroniX
-*/
 
-230125 - AT24C64 EEPROM  Enabled.  Automatic CRC Update Upon Calibration Default Changes.  Various Small Code Updates
+230510 - Minor changes
+230218 - Averaging and Reduce Jitter, with Thresholds.  Added booleans 'DisableHardwareTest', also 'EnableBasicInfo' to simplifiy displayed values and loop this info
+230125 - AT24C64 EEPROM Enabled.  Automatic CRC Update Upon Calibration Default Changes.  Various Small Code Updates
 230121 - Various Small Code Updates.  Import/Export Power. Improvements to Domoticz.  Setup for 8V AC In.
 230103 - Code Updates and Calibration Info
 230103 - Updated to Platform IO and added support for Domoticz

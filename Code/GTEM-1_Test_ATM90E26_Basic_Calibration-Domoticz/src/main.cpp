@@ -2,7 +2,7 @@
   Dave Williams, DitroniX 2019-2023 (ditronix.net)
   GTEM-1 ATM90E26 Energy Monitoring Energy Monitor  v1.0
   Features include ESP32 GTEM ATM90E26 16bit ADC EEPROM OPTO CT-Clamp Current Voltage Frequency Power Factor GPIO I2C OLED SMPS D1 USB
-  PCA 1.2212-105 - Test Code Firmware v1
+  PCA 1.2212-105 - Test Code Firmware v1 - Development Code - WORK-IN-PROGRESS - 10th May 2023
 
   The purpose of this test code is to cycle through the various main functions of the board, as shown below, as part of board bring up testing.
 
@@ -28,6 +28,16 @@
     - Update the Wifi, Domoticz Server and Device Index Values in 'Domoticz.h'.  Creating new Devices first in Domoticz.
     - Once you are happy with the values, update the 'EnableDomoticz' to 'true'.
     - Reflash code to board.  All done!
+
+  WiFi Updates
+
+  * Setup WiFi
+
+  DOMOTICZ
+
+  * Setup connection to Domoticz Home Automation
+  * Configure Required Values to Pubish to Domoticz Hardware Device Indexes
+  * EnableDomoticz = true
 
   Code register formulation based on the excellent ground work from Tisham Dhar, whatnick | ATM90E26 Energy Monitor | Code upgraded and updated by Date Williams
 
@@ -57,7 +67,7 @@
 // ****************  VARIABLES / DEFINES / STATIC / STRUCTURES ****************
 
 // App
-String AppVersion = "GTEM Test 230125";
+String AppVersion = "GTEM Test 230510";
 String AppBuild = "DitroniX GTEM-1 ATM90E26 SDK Board";
 String AppName = "GTEM Energy Monitor - Calibration and Domoticz";
 
@@ -69,9 +79,16 @@ float TemperatureC;
 float TemperatureF;
 
 // Constants
-const int LoopDelay = 1;     // Loop Delay in Seconds
-float ADC_Constant = 31.340; // Adjust as needed for calibration of VDC_IN.
+const int LoopDelay = 1;       // Loop Delay in Seconds
+const int AverageSamples = 25; // Average Multi-Samples.
+const int AverageDelay = 20;    // Average Multi-Sample Delay.
+float ADC_Constant = 31.340;   // Adjust as needed for calibration of VDC_IN.
 uint64_t chipid = ESP.getEfuseMac();
+
+// **************** CONFIGURATION ****************
+boolean DisableHardwareTest = false; // Set to false to speed up booting
+boolean EnableBasicInfo = false;      // Set to true to display basic loop readings
+boolean EnableAveraging = true;      // Set to true to enable averaging
 
 // **************** INPUTS ****************
 #define DCV_IN 36      // GPIO 36 (Analog VP / ADC 1 CH0)
@@ -100,6 +117,86 @@ uint64_t chipid = ESP.getEfuseMac();
 ATM90E26_SPI eic;
 
 // **************** FUNCTIONS AND ROUTINES ****************
+
+// Calculate Average LineVoltage Value and Reduce Jitter
+float CalculateAverageLineVoltage()
+{
+  float AverageRAW = 0;
+  float Threshold = 10; // Volts
+  for (int i = 0; i < AverageSamples; i++)
+  {
+    AverageRAW = AverageRAW + eic.GetLineVoltage();
+    delay(AverageDelay);
+  }
+  AverageRAW = AverageRAW / AverageSamples;
+  if (AverageRAW < Threshold)
+    AverageRAW = 0;
+  return AverageRAW;
+}
+
+// Calculate Average LineCurrent Value and Reduce Jitter
+float CalculateAverageLineCurrent()
+{
+  float AverageRAW = 0;
+  float Threshold = 0.0; // Amps
+  for (int i = 0; i < AverageSamples; i++)
+  {
+    AverageRAW = AverageRAW + eic.GetLineCurrent(); // Current always a positive value
+    delay(AverageDelay);
+  }
+  AverageRAW = AverageRAW / AverageSamples;
+  if (AverageRAW < Threshold)
+    AverageRAW = 0;
+  return AverageRAW;
+}
+
+// Calculate Average ActivePower Value and Reduce Jitter
+float CalculateAverageActivePower()
+{
+  float AverageRAW = 0;
+  float Threshold = 50; // Watts
+  for (int i = 0; i < AverageSamples; i++)
+  {
+    AverageRAW = AverageRAW + eic.GetActivePower();
+    delay(AverageDelay);
+  }
+  AverageRAW = AverageRAW / AverageSamples;
+  if (AverageRAW < Threshold && AverageRAW > -Threshold)
+    AverageRAW = 0;
+  return AverageRAW;
+}
+
+// Calculate Average ImportPower Value and Reduce Jitter
+float CalculateAverageImportPower()
+{
+  float AverageRAW = 0;
+  float Threshold = 50; // Watts
+  for (int i = 0; i < AverageSamples; i++)
+  {
+    AverageRAW = AverageRAW + eic.GetImportPower(); // Always a positive value
+    delay(AverageDelay);
+  }
+  AverageRAW = AverageRAW / AverageSamples;
+  if (AverageRAW < Threshold)
+    AverageRAW = 0;
+  return AverageRAW;
+}
+
+// Calculate Average ExportPower Value and Reduce Jitter
+float CalculateAverageExportPower()
+{
+  float AverageRAW = 0;
+  float Threshold = 50; // Watts
+  for (int i = 0; i < AverageSamples; i++)
+  {
+    AverageRAW = AverageRAW + eic.GetExportPower(); // Always a positive value
+    delay(AverageDelay);
+  }
+  AverageRAW = AverageRAW / AverageSamples;
+  if (AverageRAW < Threshold)
+    AverageRAW = 0;
+  return AverageRAW;
+}
 
 void DisplayBIN16(int var) // Display BIN from Var
 {
@@ -142,186 +239,204 @@ void DisplayRegisters() // Display Diagnostic Report
   Serial.print("   Firmware Version = ");
   Serial.println(AppVersion);
   Serial.println();
-  Serial.println("Register Name\t\t\tVar/Address\t\tValue / Binary / Information");
-  Serial.println("------------ \t\t\t-----------\t\t--------------------------------------------------------");
 
-  // System Status
-  Serial.print("System Status \t\t\t(SysStatus 0x01):\t0x");
-  ReadValue = eic.GetSysStatus();
-  DisplayHEX(ReadValue, 4);
-  DisplayBIN16(ReadValue);
-  if (bitRead(ReadValue, 1))
-    Serial.print("SagWarn.Enabled ");
-  if (bitRead(ReadValue, 13) && bitRead(ReadValue, 12))
-    Serial.print("CheckSumError.CS2 ");
-  if (bitRead(ReadValue, 15) && bitRead(ReadValue, 14))
-    Serial.print("CheckSumError.CS1 ");
-  Serial.println();
-  if (ReadValue == 0x0000)
-    Serial.println(">ATM 0x01 - #0000 System Status Default Value");
-  if (ReadValue == 0xFFFF)
-    Serial.println(">ATM 0x01 - #FFFF Failed | Fault on ATM | Reboot Needed");
+  if (EnableBasicInfo == false) // Restrict displayed information if EnableBasicInfo is true
+  {
+    Serial.println("Register Name\t\t\tVar/Address\t\tValue / Binary / Information");
+    Serial.println("------------ \t\t\t-----------\t\t--------------------------------------------------------");
 
-  // Meter Status
-  yield();
-  Serial.print("Meter Status \t\t\t(EnStatus 0x46):\t0x");
-  ReadValue = eic.GetMeterStatus();
-  DisplayHEX(ReadValue, 4);
-  DisplayBIN16(ReadValue);
-  if (!bitRead(ReadValue, 1) && !bitRead(ReadValue, 0))
-    Serial.print("LNMode.AntiTamper ");
-  if (!bitRead(ReadValue, 1) && bitRead(ReadValue, 0))
-    Serial.print("LNMode.FixedL ");
-  if (bitRead(ReadValue, 1) && !bitRead(ReadValue, 0))
-    Serial.print("LNMode.LN ");
-  if (bitRead(ReadValue, 1) && bitRead(ReadValue, 0))
-    Serial.print("LNMode.Flexible ");
-  if (bitRead(ReadValue, 11))
-    Serial.print("Lline.AntiTamperL ");
-  if (!bitRead(ReadValue, 11))
-    Serial.print("Lline.AntiTamperN ");
-  if (bitRead(ReadValue, 12))
-    Serial.print("RevP.CF1ActiveReverse ");
-  if (!bitRead(ReadValue, 12))
-    Serial.print("RevP.CF1ActiveForward ");
-  if (bitRead(ReadValue, 13))
-    Serial.print("RevQ.CF2ReActiveReverse ");
-  if (!bitRead(ReadValue, 13))
-    Serial.print("RevQ.CF2ReActiveForward ");
-  if (bitRead(ReadValue, 14))
-    Serial.print("Pnoload.NoLoadActive ");
-  if (!bitRead(ReadValue, 14))
-    Serial.print("Pnoload.NoLoadNotActive ");
-  if (bitRead(ReadValue, 15))
-    Serial.print("Qnoload.ReactiveNoLoad ");
-  if (!bitRead(ReadValue, 15))
-    Serial.print("Qnoload.NotReactiveNoLoad ");
-  Serial.println();
-  if (ReadValue == 0x2801)
-    Serial.println(">ATM 0x46- #2801 Accumulator Populated");
-  if (ReadValue == 0xC801)
-    Serial.println(">ATM 0x46- #C801 Accumulator Not Running");
-  if (ReadValue == 0xC800)
-    Serial.println(">ATM 0x46 - #C800 Meter Status Default Value");
-  if (ReadValue == 0xFFFF)
-    Serial.println(">ATM 0x46 - #FFFF Failed | Fault on ATM | Reboot Needed");
-  if (ReadValue == 0x0000)
-    Serial.println(">ATM 0x46 - #0000 ERROR!: Possible ATM Hardware Issue\n\n");
+    // System Status
+    Serial.print("System Status \t\t\t(SysStatus 0x01):\t0x");
+    ReadValue = eic.GetSysStatus();
+    DisplayHEX(ReadValue, 4);
+    DisplayBIN16(ReadValue);
+    if (bitRead(ReadValue, 1))
+      Serial.print("SagWarn.Enabled ");
+    if (bitRead(ReadValue, 13) && bitRead(ReadValue, 12))
+      Serial.print("CheckSumError.CS2 ");
+    if (bitRead(ReadValue, 15) && bitRead(ReadValue, 14))
+      Serial.print("CheckSumError.CS1 ");
+    Serial.println();
+    if (ReadValue == 0x0000)
+      Serial.println(">ATM 0x01 - #0000 System Status Default Value");
+    if (ReadValue == 0xFFFF)
+      Serial.println(">ATM 0x01 - #FFFF Failed | Fault on ATM | Reboot Needed");
 
-  // MMode Metering Status
-  yield();
-  Serial.print("MMode Status \t\t\t(MMode 0x2B):\t\t0x");
-  ReadValue = eic.GetMModeStatus();
-  DisplayHEX(ReadValue, 4);
-  DisplayBIN16(ReadValue);
-  if (!bitRead(ReadValue, 5) && !bitRead(ReadValue, 4))
-    Serial.print("MMode.PositiveZeroCrossing ");
-  if (!bitRead(ReadValue, 5) && bitRead(ReadValue, 4))
-    Serial.print("MMode.NegativeZeroCrossing ");
-  if (bitRead(ReadValue, 5) && !bitRead(ReadValue, 4))
-    Serial.print("MMode.AllZeroCrossing ");
-  if (bitRead(ReadValue, 5) && bitRead(ReadValue, 4))
-    Serial.print("MMode.NoZeroCrossing ");
-  if (bitRead(ReadValue, 10))
-    Serial.print("MMode.LNSel.LLine(Default) ");
-  if (!bitRead(ReadValue, 10))
-    Serial.print("MMode.LNSel.NLine ");
-  if (!bitRead(ReadValue, 12) && !bitRead(ReadValue, 11))
-    Serial.print("MMode.NLine.CurrentGain2 ");
-  if (!bitRead(ReadValue, 12) && bitRead(ReadValue, 11))
-    Serial.print("MMode.NLine.CurrentGain4 ");
-  if (bitRead(ReadValue, 12) && !bitRead(ReadValue, 11))
-    Serial.print("MMode.NLine.CurrentGain1 ");
-  if (bitRead(ReadValue, 12) && bitRead(ReadValue, 11))
-    Serial.print("MMode.NLine.CurrentGain1 ");
-  if (bitRead(ReadValue, 15))
-    Serial.print("MMode.CurrentChannelGain1 ");
-  if (!bitRead(ReadValue, 15) && !bitRead(ReadValue, 14) && !bitRead(ReadValue, 13))
-    Serial.print("MMode.LGain.CurrentChannelGain4 ");
-  if (!bitRead(ReadValue, 15) && !bitRead(ReadValue, 14) && bitRead(ReadValue, 13))
-    Serial.print("MMode.LGain.CurrentChannelGain8 ");
-  if (!bitRead(ReadValue, 15) && bitRead(ReadValue, 14) && !bitRead(ReadValue, 13))
-    Serial.print("MMode.LGain.CurrentChannelGain16 ");
-  if (!bitRead(ReadValue, 15) && bitRead(ReadValue, 14) && bitRead(ReadValue, 13))
-    Serial.print("MMode.LGain.CurrentChannelGain24 ");
-  Serial.println();
-  if (ReadValue == 0x9422)
-    Serial.println(">ATM 0x2B - #9422 MMode Default Value");
+    // Meter Status
+    yield();
+    Serial.print("Meter Status \t\t\t(EnStatus 0x46):\t0x");
+    ReadValue = eic.GetMeterStatus();
+    DisplayHEX(ReadValue, 4);
+    DisplayBIN16(ReadValue);
+    if (!bitRead(ReadValue, 1) && !bitRead(ReadValue, 0))
+      Serial.print("LNMode.AntiTamper ");
+    if (!bitRead(ReadValue, 1) && bitRead(ReadValue, 0))
+      Serial.print("LNMode.FixedL ");
+    if (bitRead(ReadValue, 1) && !bitRead(ReadValue, 0))
+      Serial.print("LNMode.LN ");
+    if (bitRead(ReadValue, 1) && bitRead(ReadValue, 0))
+      Serial.print("LNMode.Flexible ");
+    if (bitRead(ReadValue, 11))
+      Serial.print("Lline.AntiTamperL ");
+    if (!bitRead(ReadValue, 11))
+      Serial.print("Lline.AntiTamperN ");
+    if (bitRead(ReadValue, 12))
+      Serial.print("RevP.CF1ActiveReverse ");
+    if (!bitRead(ReadValue, 12))
+      Serial.print("RevP.CF1ActiveForward ");
+    if (bitRead(ReadValue, 13))
+      Serial.print("RevQ.CF2ReActiveReverse ");
+    if (!bitRead(ReadValue, 13))
+      Serial.print("RevQ.CF2ReActiveForward ");
+    if (bitRead(ReadValue, 14))
+      Serial.print("Pnoload.NoLoadActive ");
+    if (!bitRead(ReadValue, 14))
+      Serial.print("Pnoload.NoLoadNotActive ");
+    if (bitRead(ReadValue, 15))
+      Serial.print("Qnoload.ReactiveNoLoad ");
+    if (!bitRead(ReadValue, 15))
+      Serial.print("Qnoload.NotReactiveNoLoad ");
+    Serial.println();
+    if (ReadValue == 0x2801)
+      Serial.println(">ATM 0x46- #2801 Accumulator Populated");
+    if (ReadValue == 0xC801)
+      Serial.println(">ATM 0x46- #C801 Accumulator Not Running");
+    if (ReadValue == 0xC800)
+      Serial.println(">ATM 0x46 - #C800 Meter Status Default Value");
+    if (ReadValue == 0xFFFF)
+      Serial.println(">ATM 0x46 - #FFFF Failed | Fault on ATM | Reboot Needed");
+    if (ReadValue == 0x0000)
+      Serial.println(">ATM 0x46 - #0000 ERROR!: Possible ATM Hardware Issue\n\n");
 
-  // ATM Read Values
+    // MMode Metering Status
+    yield();
+    Serial.print("MMode Status \t\t\t(MMode 0x2B):\t\t0x");
+    ReadValue = eic.GetMModeStatus();
+    DisplayHEX(ReadValue, 4);
+    DisplayBIN16(ReadValue);
+    if (!bitRead(ReadValue, 5) && !bitRead(ReadValue, 4))
+      Serial.print("MMode.PositiveZeroCrossing ");
+    if (!bitRead(ReadValue, 5) && bitRead(ReadValue, 4))
+      Serial.print("MMode.NegativeZeroCrossing ");
+    if (bitRead(ReadValue, 5) && !bitRead(ReadValue, 4))
+      Serial.print("MMode.AllZeroCrossing ");
+    if (bitRead(ReadValue, 5) && bitRead(ReadValue, 4))
+      Serial.print("MMode.NoZeroCrossing ");
+    if (bitRead(ReadValue, 10))
+      Serial.print("MMode.LNSel.LLine(Default) ");
+    if (!bitRead(ReadValue, 10))
+      Serial.print("MMode.LNSel.NLine ");
+    if (!bitRead(ReadValue, 12) && !bitRead(ReadValue, 11))
+      Serial.print("MMode.NLine.CurrentGain2 ");
+    if (!bitRead(ReadValue, 12) && bitRead(ReadValue, 11))
+      Serial.print("MMode.NLine.CurrentGain4 ");
+    if (bitRead(ReadValue, 12) && !bitRead(ReadValue, 11))
+      Serial.print("MMode.NLine.CurrentGain1 ");
+    if (bitRead(ReadValue, 12) && bitRead(ReadValue, 11))
+      Serial.print("MMode.NLine.CurrentGain1 ");
+    if (bitRead(ReadValue, 15))
+      Serial.print("MMode.CurrentChannelGain1 ");
+    if (!bitRead(ReadValue, 15) && !bitRead(ReadValue, 14) && !bitRead(ReadValue, 13))
+      Serial.print("MMode.LGain.CurrentChannelGain4 ");
+    if (!bitRead(ReadValue, 15) && !bitRead(ReadValue, 14) && bitRead(ReadValue, 13))
+      Serial.print("MMode.LGain.CurrentChannelGain8 ");
+    if (!bitRead(ReadValue, 15) && bitRead(ReadValue, 14) && !bitRead(ReadValue, 13))
+      Serial.print("MMode.LGain.CurrentChannelGain16 ");
+    if (!bitRead(ReadValue, 15) && bitRead(ReadValue, 14) && bitRead(ReadValue, 13))
+      Serial.print("MMode.LGain.CurrentChannelGain24 ");
+    Serial.println();
+    if (ReadValue == 0x9422)
+      Serial.println(">ATM 0x2B - #9422 MMode Default Value");
 
-  Serial.println("-----------");
+    // ATM Read Values
 
-  // CalStart Status
-  yield();
-  Serial.print("Calibraration Status \t\t(CalStart 0x20):\t0x");
-  ReadValue = eic.GetCalStartStatus();
-  DisplayHEX(ReadValue, 4);
-  DisplayBIN16(ReadValue);
-  if (ReadValue == 0x6886)
-    Serial.print("Power-On Value. Metering Function is Disabled");
-  if (ReadValue == 0x5678)
-    Serial.print("CALIBRATION | Meter Calibration Startup Command");
-  if (ReadValue == 0x8765)
-    Serial.print("RUNNING | Normal Metering Mode");
-  if (ReadValue != 0x6886 && ReadValue != 0x5678 && ReadValue != 0x8765)
-    Serial.print(">ATM 0x20 - Metering Function is Disabled");
-  Serial.println();
+    Serial.println("-----------");
 
-  yield();
-  Serial.print("UGain Calibration Value\t\t(UGain 0x31):\t\t0x");
-  ReadValue = eic.GetUGain();
-  DisplayHEX(ReadValue, 4);
-  if (bitRead(ReadValue, 15))
-    Serial.print("UGain Possible Value Error");
-  Serial.println();
+    // CalStart Status
+    yield();
+    Serial.print("Calibraration Status \t\t(CalStart 0x20):\t0x");
+    ReadValue = eic.GetCalStartStatus();
+    DisplayHEX(ReadValue, 4);
+    DisplayBIN16(ReadValue);
+    if (ReadValue == 0x6886)
+      Serial.print("Power-On Value. Metering Function is Disabled");
+    if (ReadValue == 0x5678)
+      Serial.print("CALIBRATION | Meter Calibration Startup Command");
+    if (ReadValue == 0x8765)
+      Serial.print("RUNNING | Normal Metering Mode");
+    if (ReadValue != 0x6886 && ReadValue != 0x5678 && ReadValue != 0x8765)
+      Serial.print(">ATM 0x20 - Metering Function is Disabled");
+    Serial.println();
 
-  yield();
-  Serial.print("LGain Calibration Value\t\t(LGain 0x23):\t\t0x");
-  ReadValue = eic.GetLGain();
-  DisplayHEX(ReadValue, 4);
-  Serial.println();
+    yield();
+    Serial.print("UGain Calibration Value\t\t(UGain 0x31):\t\t0x");
+    ReadValue = eic.GetUGain();
+    DisplayHEX(ReadValue, 4);
+    if (bitRead(ReadValue, 15))
+      Serial.print("UGain Possible Value Error");
+    Serial.println();
 
-  yield();
-  Serial.print("IGain Calibration Value\t\t(IgainL 0x32):\t\t0x");
-  ReadValue = eic.GetIGain();
-  DisplayHEX(ReadValue, 4);
-  Serial.println();
+    yield();
+    Serial.print("LGain Calibration Value\t\t(LGain 0x23):\t\t0x");
+    ReadValue = eic.GetLGain();
+    DisplayHEX(ReadValue, 4);
+    Serial.println();
 
-  // Checksum 1 Status
-  yield();
-  Serial.print("Checksum Status \t\t(CS1 0x2C):\t\t0x");
-  ReadValue = eic.GetCS1Status();
-  DisplayHEX(ReadValue, 4);
-  if (ReadValue != eic.GetCS1Calculated())
-  { // 0xC000
-    Serial.print("*ERROR: Please update _crc1 to ATM Calculated CRC: 0x");
-    Serial.print(eic.GetCS1Calculated(), HEX);
+    yield();
+    Serial.print("IGain Calibration Value\t\t(IgainL 0x32):\t\t0x");
+    ReadValue = eic.GetIGain();
+    DisplayHEX(ReadValue, 4);
+    Serial.println();
+
+    // Checksum 1 Status
+    yield();
+    Serial.print("Checksum Status \t\t(CS1 0x2C):\t\t0x");
+    ReadValue = eic.GetCS1Status();
+    DisplayHEX(ReadValue, 4);
+    if (ReadValue != eic.GetCS1Calculated())
+    { // 0xC000
+      Serial.print("*ERROR: Please update _crc1 to ATM Calculated CRC: 0x");
+      Serial.print(eic.GetCS1Calculated(), HEX);
+    }
+    Serial.println();
+
+    // Checksum 2 Status
+    yield();
+    Serial.print("Checksum Status \t\t(CS2 0x3B):\t\t0x");
+    ReadValue = eic.GetCS2Status();
+    DisplayHEX(ReadValue, 4);
+    if (ReadValue != eic.GetCS2Calculated())
+    { // 0x3000
+      Serial.print("*ERROR: Please update _crc2 to ATM Calculated CRC: 0x");
+      Serial.print(eic.GetCS2Calculated(), HEX);
+    }
+    Serial.println();
+
+    Serial.println("-----------");
   }
-  Serial.println();
-
-  // Checksum 2 Status
-  yield();
-  Serial.print("Checksum Status \t\t(CS2 0x3B):\t\t0x");
-  ReadValue = eic.GetCS2Status();
-  DisplayHEX(ReadValue, 4);
-  if (ReadValue != eic.GetCS2Calculated())
-  { // 0x3000
-    Serial.print("*ERROR: Please update _crc2 to ATM Calculated CRC: 0x");
-    Serial.print(eic.GetCS2Calculated(), HEX);
-  }
-  Serial.println();
-
-  Serial.println("-----------");
 
   yield();
   Serial.print("Line Voltage \t\t\t(Urms 0x49):\t\t");
-  Serial.print(eic.GetLineVoltage());
+  if (EnableAveraging == true)
+  {
+    Serial.print(CalculateAverageLineVoltage());
+  }
+  else
+  {
+    Serial.print(eic.GetLineVoltage());
+  }
   Serial.println(" V");
 
   yield();
   Serial.print("Line Current \t\t\t(Irms 0x48):\t\t");
-  Serial.print(eic.GetLineCurrent());
+  if (EnableAveraging == true)
+  {
+    Serial.print(CalculateAverageLineCurrent());
+  }
+  else
+  {
+    Serial.print(eic.GetLineCurrent());
+  }
   Serial.println(" A");
 
   yield();
@@ -330,21 +445,39 @@ void DisplayRegisters() // Display Diagnostic Report
   Serial.println(" Hz");
 
   yield();
-  ReadFloat = eic.GetActivePower();
   Serial.print("Active Power \t\t\t(Pmean 0x4A):\t\t");
-  Serial.print(ReadFloat);
+  if (EnableAveraging == true)
+  {
+    Serial.print(CalculateAverageActivePower());
+  }
+  else
+  {
+    Serial.print(eic.GetActivePower());
+  }
   Serial.println(" W");
 
   yield();
-  ReadFloat = eic.GetImportPower();
   Serial.print("Import Power \t\t\t(Pmean 0x4A +):\t\t");
-  Serial.print(ReadFloat);
+  if (EnableAveraging == true)
+  {
+    Serial.print(CalculateAverageImportPower());
+  }
+  else
+  {
+    Serial.print(eic.GetImportPower());
+  }
   Serial.println(" W");
 
   yield();
-  ReadFloat = eic.GetExportPower();
   Serial.print("Export Power \t\t\t(Pmean 0x4A -):\t\t");
-  Serial.print(ReadFloat);
+  if (EnableAveraging == true)
+  {
+    Serial.print(CalculateAverageExportPower());
+  }
+  else
+  {
+    Serial.print(eic.GetExportPower());
+  }
   Serial.println(" W");
 
   Serial.println("-----------");
@@ -390,27 +523,33 @@ void DisplayRegisters() // Display Diagnostic Report
 
   Serial.println("-----------");
 
-  // DCV_IN
-  yield();
-  // ReadADCVoltage();
-  Serial.print("DC Voltage Sensor \t\t(DCV_IN VP):\t\t");
-  Serial.print(ADC_Voltage);
-  if (ADC_Voltage < 5)
-    Serial.print(" V USB Powered.  Note - Not all ATM functions will work in this mode");
-  if (ADC_Voltage > 5)
-    Serial.print(" V AC/DC Input");
-  if (ADC_Voltage > 20)
-    Serial.print(" V *WARNING: Please Check Input Voltage.  Too High!");
-  Serial.println();
+  if (DisableHardwareTest == true)
+  {
+    // DCV_IN
+    yield();
+    // ReadADCVoltage();
+    Serial.print("DC Voltage Sensor \t\t(DCV_IN VP):\t\t");
+    Serial.print(ADC_Voltage);
+    if (ADC_Voltage < 5)
+      Serial.print(" V USB Powered.  Note - Not all ATM functions will work in this mode");
+    if (ADC_Voltage > 5)
+      Serial.print(" V AC/DC Input");
+    if (ADC_Voltage > 20)
+      Serial.print(" V *WARNING: Please Check Input Voltage.  Too High!");
+    Serial.println();
 
-  // NTC
-  yield();
-  // ReadTemperature();
-  Serial.print("PCB Temperature Sensor\t\t(NTC_IN VN):\t\t");
-  Serial.print(TemperatureC);
-  Serial.println(" ºC");
+    // NTC
+    yield();
+    // ReadTemperature();
+    Serial.print("PCB Temperature Sensor\t\t(NTC_IN VN):\t\t");
+    Serial.print(TemperatureC);
+    Serial.println(" ºC");
 
-  Serial.println("\n");
+    Serial.println("\n");
+
+    if (EnableDomoticz == false)
+      Serial.println("Set EnableDomoticz to true (in Domoticz.h), to enable Domoticz Publishing");
+  }
 }
 
 void TestRGB()
@@ -646,8 +785,12 @@ void setup()
   Wire.begin(I2C_SDA, I2C_SCL);
 
   // Hardware Tests
-  TestRGB();          // Cycle RGB LED
-  ScanI2CBus();       // Scan I2C Bus and Report Devices
+  if (DisableHardwareTest == true)
+  {
+    TestRGB();    // Cycle RGB LED
+    ScanI2CBus(); // Scan I2C Bus and Report Devices
+  }
+
   InitializeEEPROM(); // Initialize EEPROM
 
   /*Initialise ATM90E26 + SPI port */
@@ -656,10 +799,13 @@ void setup()
   // Stabalise
   delay(250);
 
-  ReadTemperature(); // Read PCB NTC Temperature
-  ReadADCVoltage();  // Read AC>DC Input Voltage
+  if (DisableHardwareTest == true)
+  {
+    ReadTemperature(); // Read PCB NTC Temperature
+    ReadADCVoltage();  // Read AC>DC Input Voltage
+  }
 
-  DisplayRegisters(); // Display Registers Once.  Update CRC if required and store in EEPROM.
+  DisplayRegisters(); // Display Registers Once.  Update CRC if required and store in EEPROM.  Do not disable.
 }
 
 // **************** LOOP ****************
@@ -683,6 +829,13 @@ void loop()
       ReadADCVoltage();   // Read AC>DC Input Voltage
       PublishRegisters(); // Publish to Domoticz
     }
+
+    if (EnableBasicInfo == true)
+    {
+      DisplayRegisters(); // Display Basic Readings
+      Serial.println("");
+    }
+
     // Heatbeat LED
     digitalWrite(LED_Blue, LOW);
     delay(50);

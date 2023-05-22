@@ -22,12 +22,16 @@ boolean CRCErrorFlag = false; // Updated to true if CRC error
 // **************** FUNCTIONS / ROUTINES / CLASSES for CALIBRATION ****************
 
 // Calibration Defaults.  If updated, CRC is autocalculated upon boot and re-read from EEPROM.
+// Simply use XLS to approxi,ate calculate UGAIN and IGAIN.  Enter below and 'Upload'.  CRC will auto calcualte.
+// Remember that the mains voltage continuously changes slightly!  You will see this when monitoring.
+// NB. Testing was done with a pure sinewave inverter (TLC SK 652100) to give constant 230v and a Resistive fixed load.
+// If the current clamp is correctly placed and current reduces on load - simply reverse the transformer AC in!
 ATM90E26_SPI::ATM90E26_SPI(int pin)
 {
   _cs = pin;
-  _lgain = 0x1D39; // PL CONSTANT.  Use XLS to calculate these values. Examples: 0x1D39; 0x1D39
-  _ugain = 0x9F9A; // VOLTAGE RMS.  Use XLS to calculate these values. Examples: 8V 0xA028 | 12V 0x9F9A or 0x9E38
-  _igain = 0x2F6A; // CURRENT GAIN. Use XLS to calculate these values. Examples: 0x7160
+  _lgain = 0x1D39; // PL CONSTANT.  Use XLS to calculate these values. Examples: 0x1D39;
+  _ugain = 0x9F62; // VOLTAGE RMS Gain.  Use XLS to calculate these values. Examples: 8V 0xA028 | 12V 0x9F9A or 0x9E38
+  _igain = 0xDF36; // CURRENT RMS GAIN. Use XLS to calculate these values. Examples: 0x7160; 0x9897; 0x8DF2;
 }
 
 // Register Defaults

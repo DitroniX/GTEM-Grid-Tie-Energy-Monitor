@@ -9,7 +9,7 @@
   This test code is OPEN SOURCE and formatted for easier viewing.  Although is is not intended for real world use, it may be freely used, or modified as needed.
   It is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
-  Further information, details and examples can be found on our website wiki pages ditronix.net/wiki and also github.com/DitroniX
+  Further information, details and code examples can be found on our website wiki pages ditronix.net/wiki and on github.com/DitroniX
 */
 
 // Libraries
@@ -26,20 +26,20 @@ String HostNameHeader = "GTEM-";    // Hostname Prefix
 // Domoticz Server info.  Setup with your Domoticz IP and Port
 const char *domoticz_server = "0.0.0.0"; // IP Address
 int port = 8080;                              // Domoticz port
-boolean EnableDomoticz = false; // Change the true to enable Loop and sending data to Domoticz.
+boolean EnableDomoticz = false; // Change to true to enable read Loop and sending data to Domoticz.
 
 // Set these values to the Domoticz Devices Indexes (IDX).  If Zero, then entry is ignored. Device needs to be created in Domoticz.
-int LineVoltage = 0;    // Urms - Line Voltage RMS
-int LineCurrent = 0;    // Irms - Line Current RMS
-int ActivePower = 0;    // Pmean - Line Mean Active Power
-int ImportPower = 0;    // Pmean - Line Mean Active Import Power
-int ExportPower = 0;    // Pmean - Line Mean Active Export Power
-int LineFrequency = 0;   // Freq - Line Voltage Frequency
-int ImportEnergy = 0;    // APenergy - Forward Active Energy
-int ExportEnergy = 0;    // ANenergy - Reverse Active Energy
-int PowerFactor = 0;     // PowerF - Line Power Factor
+int LineVoltage = 34;    // Urms - Line Voltage RMS
+int LineCurrent = 35;    // Irms - Line Current RMS
+int ActivePower = 37;    // Pmean - Line Mean Active Power
+int ImportPower = 38;    // Pmean - Line Mean Active Import Power
+int ExportPower = 39;    // Pmean - Line Mean Active Export Power
+int LineFrequency = 36;   // Freq - Line Voltage Frequency
+int ImportEnergy = 40;    // APenergy - Forward Active Energy
+int ExportEnergy = 41;    // ANenergy - Reverse Active Energy
+int PowerFactor = 44;     // PowerF - Line Power Factor
 int DCVoltage = 0;      // PCB DC Input (Derived from AC)
-int PCBTemperature = 0; // PCB NTC
+int PCBTemperature = 43; // PCB NTC
 
 // Set this value to the Domoticz Device Group Index (IDX) - Note: Currently Unused Virtual Device.
 int DomoticzBaseIndex = 0; // If Zero, then entry is ignored.  Group device needs to be created in Domoticz. WIP.
