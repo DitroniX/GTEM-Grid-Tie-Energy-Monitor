@@ -1,7 +1,11 @@
 ## GTEM ESP32 ATM90E26 Energy Monitor SDK
 
-GTEM Beta Release (Showing OLED Display Connected)
-![Display-Type-B](https://ditronix.net/wp-content/uploads/2023/07/GTEM-ESP32-ATM90E26-SDK-v1-2211-101-OLED-Test-scaled.jpg?raw=true)
+
+
+
+
+GTEM Overview
+![Display-Type-B](https://github.com/DitroniX/GTEM-Grid-Tie-Energy-Monitor/blob/main/Datasheets%20and%20Information/GTEM%20Power%20Energy%20Monitor%20Board%20Overview.jpg?raw=true)
 
 GTEM 'What Is In The Shipping Box'
 ![Display-Type-B](https://ditronix.net/wp-content/uploads/2023/07/GTEM-ESP32-ATM90E26-In-The-Box-scaled.jpg?raw=true)
