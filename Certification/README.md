@@ -11,4 +11,4 @@ Further information can be found:
 - **Shop**  https://ditronix.net/shop/
 - **Hackster.io** https://www.hackster.io/ditronix
 
-Dave Williams | G8PUO | DitroniX 1981-2023 | ditronix.net
+Dave Williams | G8PUO | DitroniX 1981-2024 | ditronix.net
